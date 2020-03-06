@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-open class NodeCanvas: UIView {
+open class NodePicker: UIView {
 
     public convenience init() {
         self.init(frame: CGRect.zero)
@@ -28,7 +28,7 @@ open class NodeCanvas: UIView {
     open func initView() {
     }
     
-    override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
     }
 

@@ -7,7 +7,9 @@
 
 import Foundation
 
-class NodeTerminal {
+class NodeTerminal<T> {
+    
+    @Published var value: T?
     
     var index: Int
     

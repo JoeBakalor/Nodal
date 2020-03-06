@@ -7,6 +7,5 @@
 
 import Foundation
 
-class NodeInput: NodeTerminal {
-    
+class NodeInput<InputType>: NodeTerminal<InputType> {
 }

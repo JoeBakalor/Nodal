@@ -28,7 +28,7 @@ open class NodeCanvas: UIView {
     open func initView() {
     }
     
-    override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
     }
 

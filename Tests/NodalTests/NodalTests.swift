@@ -9,7 +9,12 @@ final class NodalTests: XCTestCase {
 
     }
 
-    static var allTests = [
-        ("testExample", testExample),
-    ]
+    func testAdder(){
+        let nodeOperation = Adder()
+        let adderNode = NodeModel<Adder.InputType, Adder.OutputType>(nodeOperation: nodeOperation)
+        adderNode.state.inputs[0].value = 5.0
+        adderNode.state.inputs[1].value = 4.0
+        adderNode.process()
+        print(adderNode.state.outputs[0].value)
+    }
 }
