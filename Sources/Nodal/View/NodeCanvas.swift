@@ -1,13 +1,14 @@
 //
-//  NodeView.swift
+//  NodeCanvas.swift
 //  
 //
 //  Created by Joe Bakalor on 3/5/20.
 //
-import UIKit
-import Foundation
 
-open class NodeView: UIView {
+import Foundation
+import UIKit
+
+open class NodeCanvas: UIView {
 
     public convenience init() {
         self.init(frame: CGRect.zero)

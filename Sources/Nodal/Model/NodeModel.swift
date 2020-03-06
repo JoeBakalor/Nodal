@@ -7,13 +7,12 @@
 
 import Foundation
 
-protocol NodeOperation {
-    func run()
-}
 
-class NodeModel{
+class NodeModel {
     
-    init(inputs: Int, outputs: Int, nodeOperation: NodeOperation ) {
+    private var state: NodeState
+    
+    init(nodeOperation: NodeOperation ) {
         
     }
     
