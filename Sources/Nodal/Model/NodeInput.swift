@@ -6,6 +6,6 @@
 //
 
 import Foundation
-
+import Combine
 class NodeInput<InputType>: NodeTerminal<InputType> {
 }

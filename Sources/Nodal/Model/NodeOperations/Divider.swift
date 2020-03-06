@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Adder: NodeOperation{
+class Divider: NodeOperation{
 
     typealias InputType = Double
     typealias OutputType = Double
@@ -21,7 +21,8 @@ class Adder: NodeOperation{
             let inputOne = state.inputs[0].value,
             let inputTwo =  state.inputs[1].value
             else { return }
-    
-        state.outputs[0].value = inputOne + inputTwo
+        print(inputOne)
+        print(inputTwo)
+        state.outputs[0].value = inputOne/inputTwo
     }
 }
