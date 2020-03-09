@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Combine
 
 class NodeOutput<OutputType>: NodeTerminal<OutputType> {
+    var subscription: AnyCancellable?
 }

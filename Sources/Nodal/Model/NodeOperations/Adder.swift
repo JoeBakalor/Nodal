@@ -23,5 +23,6 @@ class Adder: NodeOperation{
             else { return }
     
         state.outputs[0].value = inputOne + inputTwo
+        print("Output updated: \(String(describing: state.outputs[0].value))")
     }
 }

@@ -15,7 +15,6 @@ class NodeModel<InputType, OutputType> {
     var _nodeOperation: (NodeState<InputType, OutputType>) -> Void
     var state: NodeState<InputType, OutputType>
     
-    
     init<T: NodeOperation>(nodeOperation: T) throws {
         
         state = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
@@ -31,23 +30,47 @@ class NodeModel<InputType, OutputType> {
         _nodeOperation(state)
     }
     
-    func connect(inputIndex: Int, toOutputIndex: Int, ofNodeModel: NodeModel){
+    func connect(inputIndex: Int, toOutputIndex: Int, ofNodeModel: NodeModel) throws {
         
-        let newSub = ofNodeModel.state.outputs[toOutputIndex].$value.sink { (value) in
-            print(value)
+        state.inputs[inputIndex].subscription = ofNodeModel.state.outputs[toOutputIndex].$value
+            .sink { (value) in
+                if let val = value as? InputType{
+                    self.state.inputs[inputIndex].value = val
+                    self.process()
+            }
         }
-        //let newSub = NotificationCenter.default.publisher(for: ./ofNodeModel.state.outputs[toOutputIndex].value)
+    }
+
+    func connect(outputIndex: Int, toInputIndex: Int, ofNodeModel: NodeModel) throws {
+        
+        let sub = state.outputs[outputIndex].$value
+            .sink { (value) in
+                if let val = value as? InputType{
+                    ofNodeModel.state.inputs[toInputIndex].value = val
+                    ofNodeModel.process()
+            }
+        }
+        
+        ofNodeModel.state.inputs[toInputIndex].subscription = sub
+        self.state.outputs[outputIndex].subscription        = sub
     }
     
     func disconnect(inputIndex: Int){
-
+        state.inputs[inputIndex].subscription?.cancel()
     }
     
     func disconnect(outputIndex: Int){
-        
+        state.outputs[outputIndex].subscription?.cancel()
     }
     
     func disconnectAll(){
         
+        state.inputs.forEach{
+            $0.subscription?.cancel()
+        }
+        
+        state.outputs.forEach{
+            $0.subscription?.cancel()
+        }
     }
 }
