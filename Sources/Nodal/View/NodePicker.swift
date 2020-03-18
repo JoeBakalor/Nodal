@@ -9,7 +9,8 @@ import Foundation
 import UIKit
 
 open class NodePicker: UIView {
-
+    
+    
     public convenience init() {
         self.init(frame: CGRect.zero)
         self.initView()
@@ -26,6 +27,7 @@ open class NodePicker: UIView {
     }
 
     open func initView() {
+        self.backgroundColor = UIColor.gray
     }
     
     override open func layoutSubviews() {

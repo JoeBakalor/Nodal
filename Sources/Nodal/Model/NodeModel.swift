@@ -8,8 +8,6 @@
 import Foundation
 import Combine
 
-fileprivate typealias _nodeOperation = Any
-
 class NodeModel<InputType, OutputType> {
     
     var _nodeOperation: (NodeState<InputType, OutputType>) -> Void
@@ -29,6 +27,10 @@ class NodeModel<InputType, OutputType> {
     func process(){
         _nodeOperation(state)
     }
+}
+
+//MARK: Connect methods
+extension NodeModel{
     
     func connect(inputIndex: Int, toOutputIndex: Int, ofNodeModel: NodeModel) throws {
         
@@ -54,6 +56,10 @@ class NodeModel<InputType, OutputType> {
         ofNodeModel.state.inputs[toInputIndex].subscription = sub
         self.state.outputs[outputIndex].subscription        = sub
     }
+}
+
+//MARK: Disconnect methods
+extension NodeModel{
     
     func disconnect(inputIndex: Int){
         state.inputs[inputIndex].subscription?.cancel()
@@ -64,7 +70,6 @@ class NodeModel<InputType, OutputType> {
     }
     
     func disconnectAll(){
-        
         state.inputs.forEach{
             $0.subscription?.cancel()
         }

@@ -26,3 +26,4 @@ class Adder: NodeOperation{
         print("Output updated: \(String(describing: state.outputs[0].value))")
     }
 }
+

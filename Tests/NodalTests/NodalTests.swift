@@ -95,7 +95,6 @@ final class NodalTests: XCTestCase {
                     print(adderNodeTwo.state.outputs[0].value as Any)
                 }
             }
-            
         }
         catch let error{
             print(error)
