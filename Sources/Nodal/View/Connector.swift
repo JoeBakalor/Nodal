@@ -8,10 +8,17 @@
 import Foundation
 import UIKit
 
-open class Connector: UIButton {
+open class Connector: UIControl {
     
     private let backgroundLayer = CAShapeLayer()
-
+    private var index = 0
+    
+    public convenience init(index: Int) {
+        self.init(frame: CGRect.zero)
+        self.index = index
+        self.initView()
+    }
+    
     public convenience init() {
         self.init(frame: CGRect.zero)
         self.initView()
@@ -38,8 +45,15 @@ open class Connector: UIButton {
         self.addTarget(self, action: #selector(touchUp), for: .touchUpInside)
     }
     
-    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        print("Touches ended")
+    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        
+        print("Point: \(convert(point, to: self.coordinateSpace))")
+        print("Frame: \(self.frame)")
+        
+        if self.frame.contains(point){
+            print("Connector with index \(index)")
+        }
+        return nil
     }
 
     open override func layoutSubviews() {
@@ -54,6 +68,7 @@ open class Connector: UIButton {
         backgroundLayer.fillColor = NodalConfiguration.unconnectedConnectorColor.cgColor
 
     }
+    
 
     @objc
     func touchUp(){
@@ -80,5 +95,4 @@ open class Connector: UIButton {
         print("Touch drag outside")
     }
     
-
 }

@@ -39,6 +39,13 @@ open class NodeCanvas: UIView {
         super.layoutSubviews()
     }
     
+    override open func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.nodes.forEach { (node) in
+            guard let point = touches.first?.location(in: self) else { return }
+            //print(point)
+            node.hitTest(point, with: event)
+        }
+    }
 }
 
 //MARK: Test functions

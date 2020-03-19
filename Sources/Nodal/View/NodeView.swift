@@ -30,14 +30,14 @@ open class NodeView: UIView {
     public convenience init(numInputs: Int, numOutputs: Int){
         self.init(frame: CGRect.zero)
         
-        for _ in 0...numInputs - 1 {
-            let connector = Connector()
+        for i in 0...numInputs - 1 {
+            let connector = Connector(index: i)
             inputConnectors.append(connector)
         }
         
         if numOutputs > 0{
-            for _ in 0...numOutputs - 1 {
-                let connector = Connector()
+            for i in 0...numOutputs - 1 {
+                let connector = Connector(index: i)
                 outputConnectors.append(connector)
             }
         }
@@ -56,6 +56,14 @@ open class NodeView: UIView {
             self.addSubview($0)
         }
     }
+}
+
+//MARK: Hit testing
+extension NodeView{
+    
+
+    
+    
 }
 
 //MARK: View layout
@@ -144,6 +152,34 @@ extension NodeView{
 
 //MARK: Touch handlers
 extension NodeView{
+    
+    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        
+        self.inputConnectors.forEach{
+            _ = $0.hitTest(point, with: event)
+        }
+        
+        self.outputConnectors.forEach{
+            _ = $0.hitTest(point, with: event)
+        }
+        
+//        print(self.frame)
+//        print("Point: \(convert(point, to: self.superview))")
+//        print("Node frame in canvas: \(convert(self.frame, to: self.superview))")
+        
+        if self.frame.contains(convert(point, to: self.superview)){
+            return self
+        }
+        
+        return nil
+    }
+    
+    open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+        print(self.frame)
+        print("Drag Point: \(convert(point, to: self.superview))")
+        print("Node frame in canvas: \(convert(self.frame, to: self.superview))")
+        return nil
+    }
     
     open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 
