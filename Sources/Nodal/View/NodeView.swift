@@ -175,9 +175,18 @@ extension NodeView{
     }
     
     open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
-        print(self.frame)
-        print("Drag Point: \(convert(point, to: self.superview))")
-        print("Node frame in canvas: \(convert(self.frame, to: self.superview))")
+        //print(self.frame)
+        //print("Drag Point: \(convert(point, to: self.superview))")
+        //print("Node frame in canvas: \(convert(self.frame, to: self.superview))")
+        
+        self.inputConnectors.forEach{
+            _ = $0.hitTestDrag(point, with: event)
+        }
+        
+        self.outputConnectors.forEach{
+            _ = $0.hitTestDrag(point, with: event)
+        }
+        
         return nil
     }
     

@@ -41,9 +41,8 @@ open class NodeCanvas: UIView {
     
     override open func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.nodes.forEach { (node) in
-            guard let point = touches.first?.location(in: self) else { return }
-            //print(point)
-            node.hitTest(point, with: event)
+            guard let point = touches.first?.location(in: node) else { return }
+            _ = node.hitTestDrag(point, with: event)
         }
     }
 }
@@ -62,7 +61,7 @@ extension NodeCanvas{
     @objc
     func addNode(){
         
-        let newNode = NodeView(numInputs: 4, numOutputs: 4)
+        let newNode = NodeView(numInputs: 1, numOutputs: 1)
         self.addSubview(newNode)
         
         newNode.frame =

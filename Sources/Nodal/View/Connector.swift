@@ -47,9 +47,15 @@ open class Connector: UIControl {
     
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         
-        print("Point: \(convert(point, to: self.coordinateSpace))")
-        print("Frame: \(self.frame)")
-        
+        if self.frame.contains(point){
+            print("Connector with index \(index)")
+        }
+        return nil
+    }
+    
+    open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+        print(self.frame)
+        print(point)
         if self.frame.contains(point){
             print("Connector with index \(index)")
         }
