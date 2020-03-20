@@ -129,7 +129,7 @@ extension NodeView{
         }
         else {
             let outputSpacing =
-                (H - 15 - 15)/CGFloat(outputConnectors.count - 1)
+                (H - NodalConfiguration.connectorSize.width - 15)/CGFloat(outputConnectors.count - 1)
             
             outputConnectors
                 .enumerated()
@@ -204,7 +204,9 @@ extension NodeView{
         var connector: UIView? = nil
         [inputConnectors, outputConnectors].forEach{
             $0.forEach{
+                $0.checkHover(point, with: event)
                 if $0.frame.contains(point){
+                    //TODO: While we are hovering we should enlarge the connector
                     print("Hovering over connector with index: \($0.index)")
                     connector = $0
                 }
@@ -219,8 +221,8 @@ extension NodeView{
     }
     
     //
-    open func touchDown(_ point: CGPoint, with event: UIEvent?) -> UIView?{
-        var connector: UIView? = nil
+    open func touchDown(_ point: CGPoint, with event: UIEvent?) -> Connector?{
+        var connector: Connector? = nil
         [inputConnectors, outputConnectors].forEach{
             $0.forEach{
                 if $0.frame.contains(point){
@@ -245,6 +247,7 @@ extension NodeView{
                 if $0.frame.contains(point){
                     print("Touch up on connector with index: \($0.index)")
                     connector = $0
+                    $0.hoverMode = false
                 }
 //                if let _connector = $0.hitTestDrag(point, with: event){
 //                    print("HTG: conn frame = \($0.frame)")

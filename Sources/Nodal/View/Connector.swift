@@ -10,6 +10,12 @@ import UIKit
 
 open class Connector: UIControl {
     
+    public var hoverMode = false{
+        didSet { //TODO: This should be animated
+            self.layoutSubviews()
+        }
+    }
+    
     private let backgroundLayer = CAShapeLayer()
     var index = 0
     
@@ -50,20 +56,35 @@ open class Connector: UIControl {
 //        print("Connector with index \(index) hitTest")
 //        return self
 //    }
-//    
-//    open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
-//        guard self.frame.contains(point) else { return nil }
-//        print("Connector with index \(index) hitTestDrag")
-//        return self
-//    }
+//
+    open func checkHover(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+        guard self.frame.contains(point) else { hoverMode = false; return nil }
+        //print("Connector with index \(index) hitTestDrag")
+        hoverMode = true
+        return self
+    }
 
+    var hoverModeRect: CGRect = .zero
+    var normalModeRect: CGRect = .zero
+    
     open override func layoutSubviews() {
         super.layoutSubviews()
         
+        hoverModeRect =
+            CGRect(
+                x: -7.5,
+                y: -7.5,
+                width: self.bounds.width + 15,
+                height: self.bounds.width + 15)
+        
+        normalModeRect = self.bounds
+        
+        let rect = hoverMode ? hoverModeRect : normalModeRect
+        
         let backgroundPath =
             UIBezierPath(
-                roundedRect: self.bounds,
-                cornerRadius: self.bounds.width/2)
+                roundedRect: rect,
+                cornerRadius: rect.width/2)
         
         backgroundLayer.path = backgroundPath.cgPath
         backgroundLayer.fillColor = NodalConfiguration.unconnectedConnectorColor.cgColor
