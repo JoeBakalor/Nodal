@@ -11,7 +11,7 @@ import UIKit
 open class Connector: UIControl {
     
     private let backgroundLayer = CAShapeLayer()
-    private var index = 0
+    var index = 0
     
     public convenience init(index: Int) {
         self.init(frame: CGRect.zero)
@@ -39,28 +39,23 @@ open class Connector: UIControl {
     internal func initView() {
         self.layer.addSublayer(backgroundLayer)
         self.addTarget(self, action: #selector(touchDown), for: .touchDown)
-        self.addTarget(self, action: #selector(touchDragEnter), for: .touchDragEnter)
-        self.addTarget(self, action: #selector(touchDragOutside), for: .touchDragOutside)
-        self.addTarget(self, action: #selector(touchDragOutside), for: .touchDragExit)
+        //self.addTarget(self, action: #selector(touchDragEnter), for: .touchDragEnter)
+        //self.addTarget(self, action: #selector(touchDragOutside), for: .touchDragOutside)
+        //self.addTarget(self, action: #selector(touchDragOutside), for: .touchDragExit)
         self.addTarget(self, action: #selector(touchUp), for: .touchUpInside)
     }
     
-    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        
-        if self.frame.contains(point){
-            print("Connector with index \(index)")
-        }
-        return nil
-    }
-    
-    open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
-        print(self.frame)
-        print(point)
-        if self.frame.contains(point){
-            print("Connector with index \(index)")
-        }
-        return nil
-    }
+//    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+//        guard self.frame.contains(point) else { return nil }
+//        print("Connector with index \(index) hitTest")
+//        return self
+//    }
+//    
+//    open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+//        guard self.frame.contains(point) else { return nil }
+//        print("Connector with index \(index) hitTestDrag")
+//        return self
+//    }
 
     open override func layoutSubviews() {
         super.layoutSubviews()
@@ -72,10 +67,8 @@ open class Connector: UIControl {
         
         backgroundLayer.path = backgroundPath.cgPath
         backgroundLayer.fillColor = NodalConfiguration.unconnectedConnectorColor.cgColor
-
     }
     
-
     @objc
     func touchUp(){
         print("Touch up inside")

@@ -150,41 +150,30 @@ extension NodeView{
 }
 
 
-//MARK: Touch handlers
+//MARK: Default touch handlers
 extension NodeView{
     
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         
-        self.inputConnectors.forEach{
-            _ = $0.hitTest(point, with: event)
+        var connector: Connector? = nil
+        [inputConnectors, outputConnectors].forEach{
+            $0.forEach{
+                if $0.frame.contains(point){
+                    print("Hit test on connector with index: \($0.index)")
+                    connector = $0
+                }
+//                if let _connector = $0.hitTest(point, with: event){
+//                    connector = _connector as! Connector
+//                }
+            }
         }
-        
-        self.outputConnectors.forEach{
-            _ = $0.hitTest(point, with: event)
+        if let c = connector{
+            print("Selected connector \(c.index)")
+            return nil//c
         }
-        
-//        print(self.frame)
-//        print("Point: \(convert(point, to: self.superview))")
-//        print("Node frame in canvas: \(convert(self.frame, to: self.superview))")
         
         if self.frame.contains(convert(point, to: self.superview)){
             return self
-        }
-        
-        return nil
-    }
-    
-    open func hitTestDrag(_ point: CGPoint, with event: UIEvent?) -> UIView?{
-        //print(self.frame)
-        //print("Drag Point: \(convert(point, to: self.superview))")
-        //print("Node frame in canvas: \(convert(self.frame, to: self.superview))")
-        
-        self.inputConnectors.forEach{
-            _ = $0.hitTestDrag(point, with: event)
-        }
-        
-        self.outputConnectors.forEach{
-            _ = $0.hitTestDrag(point, with: event)
         }
         
         return nil
@@ -196,12 +185,90 @@ extension NodeView{
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let newPosition = touches.first?.location(in: self) else { return }
+        guard !isConnector(point: newPosition) else { return }
         self.desiredCoordinates = newPosition
     }
     
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let newPosition = touches.first?.location(in: self) else { return }
+        guard !isConnector(point: newPosition) else { return }
         self.desiredCoordinates = newPosition
+    }
+}
+
+//MARK: Custom touch handlers
+extension NodeView{
+    
+    //
+    open func touchMoved(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+        var connector: UIView? = nil
+        [inputConnectors, outputConnectors].forEach{
+            $0.forEach{
+                if $0.frame.contains(point){
+                    print("Hovering over connector with index: \($0.index)")
+                    connector = $0
+                }
+//                if let _connector = $0.hitTestDrag(point, with: event){
+//                    print("HTG: conn frame = \($0.frame)")
+//                    print("HTG: point = \(point)")
+//                    connector = _connector
+//                }
+            }
+        }
+        return connector
+    }
+    
+    //
+    open func touchDown(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+        var connector: UIView? = nil
+        [inputConnectors, outputConnectors].forEach{
+            $0.forEach{
+                if $0.frame.contains(point){
+                    print("Touch down on connector with index: \($0.index)")
+                    connector = $0
+                }
+//                if let _connector = $0.hitTestDrag(point, with: event){
+//                    print("HTG: conn frame = \($0.frame)")
+//                    print("HTG: point = \(point)")
+//                    connector = _connector
+//                }
+            }
+        }
+        return connector
+    }
+    
+    //
+    open func touchUp(_ point: CGPoint, with event: UIEvent?) -> UIView?{
+        var connector: UIView? = nil
+        [inputConnectors, outputConnectors].forEach{
+            $0.forEach{
+                if $0.frame.contains(point){
+                    print("Touch up on connector with index: \($0.index)")
+                    connector = $0
+                }
+//                if let _connector = $0.hitTestDrag(point, with: event){
+//                    print("HTG: conn frame = \($0.frame)")
+//                    print("HTG: point = \(point)")
+//                    connector = _connector
+//                }
+            }
+        }
+        return connector
+    }
+    
+    
+    
+    private func isConnector(point: CGPoint) -> Bool {
+        var c: UIView? = nil
+        [inputConnectors, outputConnectors].forEach{
+            $0.forEach{
+                if $0.frame.contains(point){
+                    c = $0
+                }
+            }
+        }
+        guard c == nil else { return true }
+        return false
     }
 }
 
