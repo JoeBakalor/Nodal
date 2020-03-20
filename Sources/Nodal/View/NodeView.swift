@@ -30,9 +30,11 @@ open class NodeView: UIView {
     public convenience init(numInputs: Int, numOutputs: Int){
         self.init(frame: CGRect.zero)
         
-        for i in 0...numInputs - 1 {
-            let connector = Connector(index: i)
-            inputConnectors.append(connector)
+        if numInputs > 0{
+            for i in 0...numInputs - 1 {
+                let connector = Connector(index: i)
+                inputConnectors.append(connector)
+            }
         }
         
         if numOutputs > 0{
@@ -47,23 +49,20 @@ open class NodeView: UIView {
 
     open func initView() {
         self.layer.addSublayer(backgroundShape)
-        
-        outputConnectors.forEach{
-            self.addSubview($0)
+        [inputConnectors, outputConnectors].forEach{
+            $0.forEach{
+                self.addSubview($0)
+            }
         }
         
-        inputConnectors.forEach{
-            self.addSubview($0)
-        }
+//        outputConnectors.forEach{
+//            self.addSubview($0)
+//        }
+//        
+//        inputConnectors.forEach{
+//            self.addSubview($0)
+//        }
     }
-}
-
-//MARK: Hit testing
-extension NodeView{
-    
-
-    
-    
 }
 
 //MARK: View layout
@@ -159,12 +158,8 @@ extension NodeView{
         [inputConnectors, outputConnectors].forEach{
             $0.forEach{
                 if $0.frame.contains(point){
-                    print("Hit test on connector with index: \($0.index)")
                     connector = $0
                 }
-//                if let _connector = $0.hitTest(point, with: event){
-//                    connector = _connector as! Connector
-//                }
             }
         }
         if let c = connector{
@@ -204,23 +199,16 @@ extension NodeView{
         var connector: UIView? = nil
         [inputConnectors, outputConnectors].forEach{
             $0.forEach{
-                $0.checkHover(point, with: event)
+                _ = $0.checkHover(point, with: event)
                 if $0.frame.contains(point){
-                    //TODO: While we are hovering we should enlarge the connector
                     print("Hovering over connector with index: \($0.index)")
                     connector = $0
                 }
-//                if let _connector = $0.hitTestDrag(point, with: event){
-//                    print("HTG: conn frame = \($0.frame)")
-//                    print("HTG: point = \(point)")
-//                    connector = _connector
-//                }
             }
         }
         return connector
     }
     
-    //
     open func touchDown(_ point: CGPoint, with event: UIEvent?) -> Connector?{
         var connector: Connector? = nil
         [inputConnectors, outputConnectors].forEach{
@@ -229,17 +217,11 @@ extension NodeView{
                     print("Touch down on connector with index: \($0.index)")
                     connector = $0
                 }
-//                if let _connector = $0.hitTestDrag(point, with: event){
-//                    print("HTG: conn frame = \($0.frame)")
-//                    print("HTG: point = \(point)")
-//                    connector = _connector
-//                }
             }
         }
         return connector
     }
     
-    //
     open func touchUp(_ point: CGPoint, with event: UIEvent?) -> UIView?{
         var connector: UIView? = nil
         [inputConnectors, outputConnectors].forEach{
@@ -249,17 +231,10 @@ extension NodeView{
                     connector = $0
                     $0.hoverMode = false
                 }
-//                if let _connector = $0.hitTestDrag(point, with: event){
-//                    print("HTG: conn frame = \($0.frame)")
-//                    print("HTG: point = \(point)")
-//                    connector = _connector
-//                }
             }
         }
         return connector
     }
-    
-    
     
     private func isConnector(point: CGPoint) -> Bool {
         var c: UIView? = nil

@@ -16,6 +16,8 @@ open class Connector: UIControl {
         }
     }
     
+    var hoverModeRect: CGRect = .zero
+    var normalModeRect: CGRect = .zero
     private let backgroundLayer = CAShapeLayer()
     var index = 0
     
@@ -51,21 +53,12 @@ open class Connector: UIControl {
         self.addTarget(self, action: #selector(touchUp), for: .touchUpInside)
     }
     
-//    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-//        guard self.frame.contains(point) else { return nil }
-//        print("Connector with index \(index) hitTest")
-//        return self
-//    }
-//
+    //Returning self not necessary atm, and not used for anything currently
     open func checkHover(_ point: CGPoint, with event: UIEvent?) -> UIView?{
         guard self.frame.contains(point) else { hoverMode = false; return nil }
-        //print("Connector with index \(index) hitTestDrag")
         hoverMode = true
         return self
     }
-
-    var hoverModeRect: CGRect = .zero
-    var normalModeRect: CGRect = .zero
     
     open override func layoutSubviews() {
         super.layoutSubviews()
