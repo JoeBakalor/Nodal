@@ -10,12 +10,17 @@ import Combine
 
 open class NodeView: UIView {
     
+    public var nodeID = UUID.init()
+    
     @Published var desiredCoordinates: CGPoint = .zero
     
     //Shape layers
     private let backgroundShape                    = CAShapeLayer()
     private var inputConnectors: [Connector]       = []
     private var outputConnectors: [Connector]      = []
+    
+    private var inputConnections: [Int: (CAShapeLayer, NodeView)] = [:]
+    private var outputConnections: [Int: (CAShapeLayer, NodeView)] = [:]
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -32,14 +37,14 @@ open class NodeView: UIView {
         
         if numInputs > 0{
             for i in 0...numInputs - 1 {
-                let connector = Connector(index: i)
+                let connector = Connector(index: i, location: .INPUT)
                 inputConnectors.append(connector)
             }
         }
         
         if numOutputs > 0{
             for i in 0...numOutputs - 1 {
-                let connector = Connector(index: i)
+                let connector = Connector(index: i, location: .OUTPUT)
                 outputConnectors.append(connector)
             }
         }
@@ -54,14 +59,14 @@ open class NodeView: UIView {
                 self.addSubview($0)
             }
         }
-        
-//        outputConnectors.forEach{
-//            self.addSubview($0)
-//        }
-//        
-//        inputConnectors.forEach{
-//            self.addSubview($0)
-//        }
+    }
+    
+    func newInputConnection(index: Int, connectionLayer: CAShapeLayer, nodeView: NodeView){
+        inputConnections[index] = (connectionLayer, nodeView)
+    }
+    
+    func newOutputConnection(index: Int, connectionLayer: CAShapeLayer, nodeView: NodeView){
+        outputConnections[index] = (connectionLayer, nodeView)
     }
 }
 
@@ -222,8 +227,8 @@ extension NodeView{
         return connector
     }
     
-    open func touchUp(_ point: CGPoint, with event: UIEvent?) -> UIView?{
-        var connector: UIView? = nil
+    open func touchUp(_ point: CGPoint, with event: UIEvent?) -> Connector?{
+        var connector: Connector? = nil
         [inputConnectors, outputConnectors].forEach{
             $0.forEach{
                 if $0.frame.contains(point){

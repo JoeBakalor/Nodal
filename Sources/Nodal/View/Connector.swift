@@ -20,9 +20,11 @@ open class Connector: UIControl {
     var normalModeRect: CGRect = .zero
     private let backgroundLayer = CAShapeLayer()
     var index = 0
+    var location: ConnectorLocation?
     
-    public convenience init(index: Int) {
+    public convenience init(index: Int, location: ConnectorLocation) {
         self.init(frame: CGRect.zero)
+        self.location = location
         self.index = index
         self.initView()
     }
@@ -46,14 +48,9 @@ open class Connector: UIControl {
 
     internal func initView() {
         self.layer.addSublayer(backgroundLayer)
-        self.addTarget(self, action: #selector(touchDown), for: .touchDown)
-        //self.addTarget(self, action: #selector(touchDragEnter), for: .touchDragEnter)
-        //self.addTarget(self, action: #selector(touchDragOutside), for: .touchDragOutside)
-        //self.addTarget(self, action: #selector(touchDragOutside), for: .touchDragExit)
-        self.addTarget(self, action: #selector(touchUp), for: .touchUpInside)
     }
     
-    //Returning self not necessary atm, and not used for anything currently
+
     open func checkHover(_ point: CGPoint, with event: UIEvent?) -> UIView?{
         guard self.frame.contains(point) else { hoverMode = false; return nil }
         hoverMode = true
@@ -81,31 +78,6 @@ open class Connector: UIControl {
         
         backgroundLayer.path = backgroundPath.cgPath
         backgroundLayer.fillColor = NodalConfiguration.unconnectedConnectorColor.cgColor
-    }
-    
-    @objc
-    func touchUp(){
-        print("Touch up inside")
-    }
-    
-    @objc
-    func touchDown(){
-        print("Touch down")
-    }
-    
-    @objc
-    func touchDragExit(){
-        print("Touch drag exit")
-    }
-    
-    @objc
-    func touchDragEnter(){
-        print("Touch drag enter")
-    }
-    
-    @objc
-    func touchDragOutside(){
-        print("Touch drag outside")
     }
     
 }

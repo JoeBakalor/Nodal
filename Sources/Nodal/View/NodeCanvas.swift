@@ -16,9 +16,11 @@ open class NodeCanvas: UIView {
     private var nodes: [NodeView]       = []
     
     // Connection building
-    private let pendingConnection = CAShapeLayer()
+    private let pendingConnectionShape = CAShapeLayer()
     private var touchDownLocation: CGPoint?
     private var travelingTouchLocation: CGPoint?
+    private var pendingConnection: Connection?
+    
     
     public convenience init() {
         self.init(frame: CGRect.zero)
@@ -38,10 +40,10 @@ open class NodeCanvas: UIView {
     open func initView() {
         self.backgroundColor = UIColor.lightGray
         addTestGesture()
-        pendingConnection.fillColor = UIColor.clear.cgColor
-        pendingConnection.strokeColor = NodalConfiguration.connectionColor.cgColor
-        pendingConnection.lineWidth = NodalConfiguration.connectionThickness
-        self.layer.addSublayer(pendingConnection)
+        pendingConnectionShape.fillColor = UIColor.clear.cgColor
+        pendingConnectionShape.strokeColor = NodalConfiguration.connectionColor.cgColor
+        pendingConnectionShape.lineWidth = NodalConfiguration.connectionThickness
+        self.layer.addSublayer(pendingConnectionShape)
     }
     
     override open func layoutSubviews() {
@@ -53,17 +55,17 @@ open class NodeCanvas: UIView {
 extension NodeCanvas{
     
     func updatePendingConnection() {
-        guard let from = touchDownLocation, let to = travelingTouchLocation else { pendingConnection.path = nil; return }
+        guard let from = touchDownLocation, let to = travelingTouchLocation else { pendingConnectionShape.path = nil; return }
         let path = UIBezierPath()
         path.move(to: from)
         let dX = to.x - from.x
         let controlPoint1 = CGPoint(x: to.x - dX*0.75, y: from.y)
         let controlPoint2 = CGPoint(x: from.x + dX*0.75, y: to.y)
         path.addCurve(to: to, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
-        pendingConnection.path = path.cgPath
+        pendingConnectionShape.path = path.cgPath
     }
     
-    func addConnection(from: CGPoint, to: CGPoint) {
+    func addConnection(from: CGPoint, to: CGPoint) -> CAShapeLayer {
         let newConnection = CAShapeLayer()
         self.layer.addSublayer(newConnection)
         let path = UIBezierPath()
@@ -76,6 +78,7 @@ extension NodeCanvas{
         newConnection.strokeColor = NodalConfiguration.connectionColor.cgColor
         newConnection.lineWidth = NodalConfiguration.connectionThickness
         newConnection.path = path.cgPath
+        return newConnection
     }
 }
 
@@ -88,6 +91,9 @@ extension NodeCanvas{
             guard let point = touches.first?.location(in: node) else { return }
             if let connector = node.touchDown(point, with: event){
                 touchDownLocation = convert(connector.center, from: node)
+                
+                let newAnchor = ConnectionAnchor(node: node, connector: connector)
+                pendingConnection = Connection(anchorOne: newAnchor, anchorTwo: nil)
             }
         }
     }
@@ -110,11 +116,15 @@ extension NodeCanvas{
             if let connector = node.touchUp(point, with: event){
                 let touchEnd = convert(connector.center, from: node)
                 guard let from = touchDownLocation else { return }
-                addConnection(from: from, to: touchEnd)
+                
+                let newAnchor = ConnectionAnchor(node: node, connector: connector)
+                pendingConnection?.connectionShape = addConnection(from: from, to: touchEnd)
+                pendingConnection?.anchorTwo = newAnchor
             }
         }
         self.travelingTouchLocation = nil
         self.touchDownLocation = nil
+        updatePendingConnection()
     }
     
     override open func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
