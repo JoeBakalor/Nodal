@@ -12,15 +12,24 @@ open class NodeView: UIView {
     
     public var nodeID = UUID.init()
     
+    public var panMode = false{
+        didSet { //TODO: This should be animated
+            self.layoutSubviews()
+        }
+    }
+    
+    private var panModeRect: CGRect = .zero
+    private var normalModeRect: CGRect = .zero
+    
     @Published var desiredCoordinates: CGPoint = .zero
+    var inputConnectors: [Connector]       = []
+    var outputConnectors: [Connector]      = []
     
     //Shape layers
     private let backgroundShape                    = CAShapeLayer()
-    private var inputConnectors: [Connector]       = []
-    private var outputConnectors: [Connector]      = []
     
-    private var inputConnections: [Int: (CAShapeLayer, NodeView)] = [:]
-    private var outputConnections: [Int: (CAShapeLayer, NodeView)] = [:]
+    var inputConnections: [Int: (CAShapeLayer, NodeView, Connector)] = [:]
+    var outputConnections: [Int: (CAShapeLayer, NodeView, Connector)] = [:]
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -61,12 +70,12 @@ open class NodeView: UIView {
         }
     }
     
-    func newInputConnection(index: Int, connectionLayer: CAShapeLayer, nodeView: NodeView){
-        inputConnections[index] = (connectionLayer, nodeView)
+    func newInputConnection(from connector: Connector, on nodeView: NodeView, to ourConnector: Connector, with connectionLayer: CAShapeLayer){
+        inputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
     }
     
-    func newOutputConnection(index: Int, connectionLayer: CAShapeLayer, nodeView: NodeView){
-        outputConnections[index] = (connectionLayer, nodeView)
+    func newOutputConnection(to connector: Connector, on nodeView: NodeView, from ourConnector: Connector, with connectionLayer: CAShapeLayer){
+        outputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
     }
 }
 
@@ -76,8 +85,16 @@ extension NodeView{
     override open func layoutSubviews() {
         super.layoutSubviews()
         
-        let H = self.bounds.height
-        let W = self.bounds.width
+        normalModeRect = self.bounds
+        panModeRect =
+            CGRect(
+                x: -7.5,
+                y: -7.5,
+                width: self.bounds.width + 15,
+                height: self.bounds.height + 15)
+        
+        let H = panMode ? panModeRect.height : self.bounds.height
+        let W = panMode ? panModeRect.width : self.bounds.width
         
         let inset = NodalConfiguration.connectorSize.width/2
         
@@ -93,6 +110,8 @@ extension NodeView{
                 roundedRect: insetRect,
                 byRoundingCorners: .allCorners,
                 cornerRadii: CGSize(width: 10, height: 10))
+        
+
         
         //Input connector positions
         if inputConnectors.count == 1 {
@@ -146,12 +165,24 @@ extension NodeView{
                         size: NodalConfiguration.connectorSize)
             }
         }
-        
         backgroundShape.path = backgroundPath.cgPath
         backgroundShape.fillColor = NodalConfiguration.nodeColor.cgColor
-
+        
+        if panMode{
+            backgroundShape.shadowColor = UIColor.black.cgColor
+            backgroundShape.shadowOffset = CGSize(width: 5, height: 5)
+            backgroundShape.shadowPath = backgroundShape.path
+            backgroundShape.shadowOpacity = 0.85
+        }
+        else{
+            backgroundShape.shadowOpacity = 0.0
+        }
+        let d = desiredCoordinates
+        desiredCoordinates = d
     }
 }
+
+
 
 
 //MARK: Default touch handlers
@@ -180,13 +211,14 @@ extension NodeView{
     }
     
     open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-
+        self.panMode = true
     }
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let newPosition = touches.first?.location(in: self) else { return }
         guard !isConnector(point: newPosition) else { return }
         self.desiredCoordinates = newPosition
+        self.panMode = false
     }
     
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {

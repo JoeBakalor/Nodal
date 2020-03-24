@@ -11,16 +11,18 @@ import Combine
 
 open class NodeCanvas: UIView {
 
-    private let nodePicker              = NodePicker()
-    private var subs: [AnyCancellable]  = []
-    private var nodes: [NodeView]       = []
+    private let nodePicker                       = NodePicker()
+    private var subs: [AnyCancellable]           = []
+    private var nodes: [NodeView]                = []
+    private var connections: [UUID:Connection]   = [:]
     
     // Connection building
-    private let pendingConnectionShape = CAShapeLayer()
-    private var touchDownLocation: CGPoint?
-    private var travelingTouchLocation: CGPoint?
-    private var pendingConnection: Connection?
+    private let pendingConnectionShape           = CAShapeLayer()
+    private var touchDownLocation                : CGPoint?
+    private var travelingTouchLocation           : CGPoint?
     
+    // On first connector selected this is initialized
+    private var pendingConnectionAnchor          : ConnectionAnchor?
     
     public convenience init() {
         self.init(frame: CGRect.zero)
@@ -91,9 +93,7 @@ extension NodeCanvas{
             guard let point = touches.first?.location(in: node) else { return }
             if let connector = node.touchDown(point, with: event){
                 touchDownLocation = convert(connector.center, from: node)
-                
-                let newAnchor = ConnectionAnchor(node: node, connector: connector)
-                pendingConnection = Connection(anchorOne: newAnchor, anchorTwo: nil)
+                pendingConnectionAnchor = ConnectionAnchor(node: node, connector: connector)
             }
         }
     }
@@ -102,6 +102,7 @@ extension NodeCanvas{
         //print("NodeCanvas: Touches moved")
         guard let pointOnCanvas = touches.first?.location(in: self) else { return }
         self.travelingTouchLocation = pointOnCanvas
+        
         self.nodes.forEach { (node) in
             guard let point = touches.first?.location(in: node) else { return }
             _ = node.touchMoved(point, with: event)
@@ -113,13 +114,18 @@ extension NodeCanvas{
         print("NodeCanvas: Touches ended")
         self.nodes.forEach { (node) in
             guard let point = touches.first?.location(in: node) else { return }
+            
             if let connector = node.touchUp(point, with: event){
+                
                 let touchEnd = convert(connector.center, from: node)
                 guard let from = touchDownLocation else { return }
+                let anchorTwo = ConnectionAnchor(node: node, connector: connector)
+                let connectionShape = addConnection(from: from, to: touchEnd)
                 
-                let newAnchor = ConnectionAnchor(node: node, connector: connector)
-                pendingConnection?.connectionShape = addConnection(from: from, to: touchEnd)
-                pendingConnection?.anchorTwo = newAnchor
+                if let anchorOne = pendingConnectionAnchor {
+                    let newConnection = Connection(anchorOne: anchorOne, anchorTwo: anchorTwo, connectionShape: connectionShape)
+                    self.connections[newConnection.connectionID] = newConnection
+                }
             }
         }
         self.travelingTouchLocation = nil
@@ -146,7 +152,7 @@ extension NodeCanvas{
     @objc
     func addNode(){
         
-        let newNode = NodeView(numInputs: 4, numOutputs: 4)
+        let newNode = NodeView(numInputs: 20, numOutputs: 20)
         self.addSubview(newNode)
         
         newNode.frame =
@@ -160,9 +166,44 @@ extension NodeCanvas{
             .sink { (newPoint) in
                 let converted = self.convert(newPoint, from: newNode)
                 newNode.center = converted
+                self.updateConnections(for: newNode)
         })
         
         nodes.append(newNode)
         layoutSubviews()
+    }
+    
+    private func updateConnections(for node: NodeView){
+        
+        node.inputConnections.forEach {
+            
+            let path = UIBezierPath()
+            let from = convert($0.value.2.center, from: $0.value.1)
+            path.move(to: from)
+            
+            let to = convert(node.inputConnectors[$0.key].center, from: node)
+            let dX = to.x - from.x
+            let controlPoint1 = CGPoint(x: to.x - dX*0.75, y: from.y)
+            let controlPoint2 = CGPoint(x: from.x + dX*0.75, y: to.y)
+
+            path.addCurve(to: to, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+            $0.value.0.path = path.cgPath
+        }
+
+        node.outputConnections.forEach {
+            
+            let path = UIBezierPath()
+            let from = convert($0.value.2.center, from: $0.value.1)
+            path.move(to: from)
+            
+            let to = convert(node.outputConnectors[$0.key].center, from: node)
+            let dX = to.x - from.x
+            let controlPoint1 = CGPoint(x: to.x - dX*0.75, y: from.y)
+            let controlPoint2 = CGPoint(x: from.x + dX*0.75, y: to.y)
+
+            path.addCurve(to: to, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+            $0.value.0.path = path.cgPath
+        }
+        
     }
 }
