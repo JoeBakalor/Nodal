@@ -7,13 +7,13 @@
 
 import Foundation
 
-class NodeTerminal<T> {
+open class NodeTerminal<T> {
     
-    @Published var value: T?
+    @Published public var value: T?
     
-    var index: Int
+    public var index: Int
     
-    init(index: Int) {
+    public init(index: Int) {
         self.index = index
     }
     

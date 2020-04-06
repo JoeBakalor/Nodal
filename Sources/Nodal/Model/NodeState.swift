@@ -8,12 +8,12 @@
 import Foundation
 
 
-class NodeState<InputType, OutputType> {
+open class NodeState<InputType, OutputType> {
     
-    var inputs  : [NodeInput<InputType>] = []
-    var outputs : [NodeOutput<OutputType>] = []
+    public var inputs  : [NodeInput<InputType>] = []
+    public var outputs : [NodeOutput<OutputType>] = []
     
-    init(numInputs: Int, numOutputs: Int) {
+    public init(numInputs: Int, numOutputs: Int) {
         
         for i in 0...numInputs - 1{
             let newInput = NodeInput<InputType>(index: i)

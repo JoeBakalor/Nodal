@@ -89,11 +89,31 @@ extension NodeCanvas{
     
     override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         print("NodeCanvas: Touches began")
+        
         self.nodes.forEach { (node) in
             guard let point = touches.first?.location(in: node) else { return }
             if let connector = node.touchDown(point, with: event){
-                touchDownLocation = convert(connector.center, from: node)
-                pendingConnectionAnchor = ConnectionAnchor(node: node, connector: connector)
+                
+                if let id = connector.associatedConnectionID{
+                    
+                    let existingConnection = self.connections[id]
+                    self.connections.removeValue(forKey: id)
+                    existingConnection?.connectionShape.removeFromSuperlayer()
+                    existingConnection?.cancel()
+                    
+                    let otherConnector = existingConnection?.anchorOne.connector == connector ? existingConnection?.anchorTwo.connector : connector
+                    let otherNode = existingConnection?.anchorOne.connector == connector ? existingConnection?.anchorTwo.node : node
+
+                    if let oc = otherConnector, let on = otherNode{
+                        touchDownLocation = convert(oc.center, from: on)
+                        pendingConnectionAnchor = ConnectionAnchor(node: on, connector: oc)
+                    }
+                    
+                }
+                else{
+                    touchDownLocation = convert(connector.center, from: node)
+                    pendingConnectionAnchor = ConnectionAnchor(node: node, connector: connector)
+                }
             }
         }
     }
@@ -117,8 +137,16 @@ extension NodeCanvas{
             
             if let connector = node.touchUp(point, with: event){
                 
-                let touchEnd = convert(connector.center, from: node)
+                // Can't connect to self
+                guard pendingConnectionAnchor?.node != node else { return }
+                
+                // Can't connect to connector if it already has a connection
+                guard connector.associatedConnectionID == nil else { return }
+                
+                // Can't make a connection if we don't have a touch down location
                 guard let from = touchDownLocation else { return }
+                
+                let touchEnd = convert(connector.center, from: node)
                 let anchorTwo = ConnectionAnchor(node: node, connector: connector)
                 let connectionShape = addConnection(from: from, to: touchEnd)
                 
@@ -138,41 +166,8 @@ extension NodeCanvas{
     }
 }
 
-//MARK: Test functions
+//MARK: Connection managment
 extension NodeCanvas{
-    
-    func addTestGesture(){
-        /**TESTING ONLY*/
-        let gestureRecognizer = UITapGestureRecognizer()
-        gestureRecognizer.numberOfTapsRequired = 2
-        gestureRecognizer.addTarget(self, action: #selector(addNode))
-        self.addGestureRecognizer(gestureRecognizer)
-    }
-    
-    @objc
-    func addNode(){
-        
-        let newNode = NodeView(numInputs: 20, numOutputs: 20)
-        self.addSubview(newNode)
-        
-        newNode.frame =
-            CGRect(
-                x: self.bounds.midX,
-                y: self.bounds.midY,
-                width: 100,
-                height: 80)
-        
-        subs.append(newNode.$desiredCoordinates
-            .sink { (newPoint) in
-                let converted = self.convert(newPoint, from: newNode)
-                newNode.center = converted
-                self.updateConnections(for: newNode)
-        })
-        
-        nodes.append(newNode)
-        layoutSubviews()
-    }
-    
     private func updateConnections(for node: NodeView){
         
         node.inputConnections.forEach {
@@ -206,4 +201,41 @@ extension NodeCanvas{
         }
         
     }
+}
+
+//MARK: Test functions
+extension NodeCanvas{
+    
+    func addTestGesture(){
+        /**TESTING ONLY*/
+        let gestureRecognizer = UITapGestureRecognizer()
+        gestureRecognizer.numberOfTapsRequired = 2
+        gestureRecognizer.addTarget(self, action: #selector(addNode))
+        self.addGestureRecognizer(gestureRecognizer)
+    }
+    
+    @objc
+    func addNode(){
+        
+        let newNode = NodeView(numInputs: 3, numOutputs: 1)
+        self.addSubview(newNode)
+        
+        newNode.frame =
+            CGRect(
+                x: self.bounds.midX,
+                y: self.bounds.midY,
+                width: 100,
+                height: 80)
+        
+        subs.append(newNode.$desiredCoordinates
+            .sink { (newPoint) in
+                let converted = self.convert(newPoint, from: newNode)
+                newNode.center = converted
+                self.updateConnections(for: newNode)
+        })
+        
+        nodes.append(newNode)
+        layoutSubviews()
+    }
+
 }

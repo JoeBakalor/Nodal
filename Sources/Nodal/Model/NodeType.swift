@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NodeType {
+public enum NodeType {
     case input
     case output
     case modifier

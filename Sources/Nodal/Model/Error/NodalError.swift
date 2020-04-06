@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum NodeError: Error{
+enum NodalError: Error{
     
 }

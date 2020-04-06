@@ -10,26 +10,27 @@ import Combine
 
 open class NodeView: UIView {
     
-    public var nodeID = UUID.init()
+    @Published var desiredCoordinates: CGPoint  = .zero
     
+    public var nodeID = UUID.init()
     public var panMode = false{
         didSet { //TODO: This should be animated
             self.layoutSubviews()
         }
     }
     
-    private var panModeRect: CGRect = .zero
-    private var normalModeRect: CGRect = .zero
+    private var panModeRect: CGRect             = .zero
+    private var normalModeRect: CGRect          = .zero
+    var inputConnectors: [Connector]    = []
+    var outputConnectors: [Connector]   = []
+    var inputConnections: [Int: (CAShapeLayer, NodeView, Connector)]    = [:]
+    var outputConnections: [Int: (CAShapeLayer, NodeView, Connector)]   = [:]
     
-    @Published var desiredCoordinates: CGPoint = .zero
-    var inputConnectors: [Connector]       = []
-    var outputConnectors: [Connector]      = []
+    // Shape layers
+    private let backgroundShape                 = CAShapeLayer()
     
-    //Shape layers
-    private let backgroundShape                    = CAShapeLayer()
-    
-    var inputConnections: [Int: (CAShapeLayer, NodeView, Connector)] = [:]
-    var outputConnections: [Int: (CAShapeLayer, NodeView, Connector)] = [:]
+    // Model
+    private var nodeModel: NodeModel<Any,Any>?
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -40,18 +41,47 @@ open class NodeView: UIView {
         super.init(frame: frame)
         self.initView()
     }
-    
-    public convenience init(numInputs: Int, numOutputs: Int){
+
+    //  Used for full operation
+    public convenience init<T: NodeOperation>(nodeOperation: T) throws {
         self.init(frame: CGRect.zero)
         
-        if numInputs > 0{
+        if nodeOperation.numberInputs > 0 {
+            for i in 0...nodeOperation.numberInputs - 1 {
+                let connector = Connector(index: i, location: .INPUT)
+                inputConnectors.append(connector)
+            }
+        }
+        
+        if nodeOperation.numberOutputs > 0 {
+            for i in 0...nodeOperation.numberOutputs - 1 {
+                let connector = Connector(index: i, location: .OUTPUT)
+                outputConnectors.append(connector)
+            }
+        }
+        
+        do {
+            nodeModel = try NodeModel(nodeOperation: nodeOperation)
+        }
+        catch let error as NodalError {
+            throw error
+        }
+        
+        self.initView()
+    }
+    
+    //  Allow for pure UI testing
+    public convenience init(numInputs: Int, numOutputs: Int) {
+        self.init(frame: CGRect.zero)
+        
+        if numInputs > 0 {
             for i in 0...numInputs - 1 {
                 let connector = Connector(index: i, location: .INPUT)
                 inputConnectors.append(connector)
             }
         }
         
-        if numOutputs > 0{
+        if numOutputs > 0 {
             for i in 0...numOutputs - 1 {
                 let connector = Connector(index: i, location: .OUTPUT)
                 outputConnectors.append(connector)
@@ -70,11 +100,19 @@ open class NodeView: UIView {
         }
     }
     
-    func newInputConnection(from connector: Connector, on nodeView: NodeView, to ourConnector: Connector, with connectionLayer: CAShapeLayer){
+    func cancelInputConnection(to ourConnector: Connector){
+        inputConnections.removeValue(forKey: ourConnector.index)
+    }
+    
+    func newInputConnection(from connector: Connector, on nodeView: NodeView, to ourConnector: Connector, with connectionLayer: CAShapeLayer) {
         inputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
     }
     
-    func newOutputConnection(to connector: Connector, on nodeView: NodeView, from ourConnector: Connector, with connectionLayer: CAShapeLayer){
+    func cancelOuptutConnection(from ourConnector: Connector){
+        outputConnections.removeValue(forKey: ourConnector.index)
+    }
+    
+    func newOutputConnection(to connector: Connector, on nodeView: NodeView, from ourConnector: Connector, with connectionLayer: CAShapeLayer) {
         outputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
     }
 }
@@ -112,9 +150,9 @@ extension NodeView{
                 cornerRadii: CGSize(width: 10, height: 10))
         
 
-        
         //Input connector positions
         if inputConnectors.count == 1 {
+            
             inputConnectors[0].frame =
                 CGRect(
                     origin: CGPoint(
@@ -126,6 +164,7 @@ extension NodeView{
             
         }
         else {
+            
             let inputSpacing =
                 (H - NodalConfiguration.connectorSize.width - 15)/CGFloat(inputConnectors.count - 1)
             
@@ -142,7 +181,8 @@ extension NodeView{
         }
         
         //Output connector positions
-        if outputConnectors.count == 1{
+        if outputConnectors.count == 1 {
+            
             outputConnectors[0].frame =
                 CGRect(
                     origin: CGPoint(
@@ -151,6 +191,7 @@ extension NodeView{
                     size: NodalConfiguration.connectorSize)
         }
         else {
+            
             let outputSpacing =
                 (H - NodalConfiguration.connectorSize.width - 15)/CGFloat(outputConnectors.count - 1)
             
@@ -165,18 +206,20 @@ extension NodeView{
                         size: NodalConfiguration.connectorSize)
             }
         }
+        
         backgroundShape.path = backgroundPath.cgPath
         backgroundShape.fillColor = NodalConfiguration.nodeColor.cgColor
         
-        if panMode{
+        if panMode {
             backgroundShape.shadowColor = UIColor.black.cgColor
             backgroundShape.shadowOffset = CGSize(width: 5, height: 5)
             backgroundShape.shadowPath = backgroundShape.path
             backgroundShape.shadowOpacity = 0.85
         }
-        else{
+        else {
             backgroundShape.shadowOpacity = 0.0
         }
+        
         let d = desiredCoordinates
         desiredCoordinates = d
     }

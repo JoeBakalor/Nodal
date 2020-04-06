@@ -10,15 +10,19 @@ import UIKit
 
 open class Connector: UIControl {
     
+    // Only non-nil when there is a connection
+    public var associatedConnectionID: UUID?
+    
     public var hoverMode = false{
         didSet { //TODO: This should be animated
             self.layoutSubviews()
         }
     }
     
-    var hoverModeRect: CGRect = .zero
-    var normalModeRect: CGRect = .zero
+    private var hoverModeRect: CGRect = .zero
+    private var normalModeRect: CGRect = .zero
     private let backgroundLayer = CAShapeLayer()
+    
     var index = 0
     var location: ConnectorLocation?
     

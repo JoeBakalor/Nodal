@@ -8,12 +8,12 @@
 import Foundation
 import Combine
 
-class NodeModel<InputType, OutputType> {
+open class NodeModel<InputType, OutputType> {
     
-    var _nodeOperation: (NodeState<InputType, OutputType>) -> Void
-    var state: NodeState<InputType, OutputType>
+    private var _nodeOperation: (NodeState<InputType, OutputType>) -> Void
+    private var state: NodeState<InputType, OutputType>
     
-    init<T: NodeOperation>(nodeOperation: T) throws {
+    public init<T: NodeOperation>(nodeOperation: T) throws {
         
         state = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
 
@@ -24,7 +24,7 @@ class NodeModel<InputType, OutputType> {
         _nodeOperation = op
     }
     
-    func process(){
+    private func process() {
         _nodeOperation(state)
     }
 }
@@ -32,49 +32,53 @@ class NodeModel<InputType, OutputType> {
 //MARK: Connect methods
 extension NodeModel{
     
-    func connect(inputIndex: Int, toOutputIndex: Int, ofNodeModel: NodeModel) throws {
+    public func connect(inputIndex: Int, toOutputIndex: Int, ofNodeModel: NodeModel) throws {
         
-        state.inputs[inputIndex].subscription = ofNodeModel.state.outputs[toOutputIndex].$value
+         let sub = ofNodeModel.state.outputs[toOutputIndex].$value
             .sink { (value) in
-                if let val = value as? InputType{
+                if let val = value as? InputType {
                     self.state.inputs[inputIndex].value = val
                     self.process()
             }
         }
+        
+        ofNodeModel.state.outputs[toOutputIndex].subscription   = sub
+        self.state.inputs[inputIndex].subscription              = sub
     }
 
-    func connect(outputIndex: Int, toInputIndex: Int, ofNodeModel: NodeModel) throws {
+    public func connect(outputIndex: Int, toInputIndex: Int, ofNodeModel: NodeModel) throws {
         
         let sub = state.outputs[outputIndex].$value
             .sink { (value) in
-                if let val = value as? InputType{
+                if let val = value as? InputType {
                     ofNodeModel.state.inputs[toInputIndex].value = val
                     ofNodeModel.process()
             }
         }
         
-        ofNodeModel.state.inputs[toInputIndex].subscription = sub
-        self.state.outputs[outputIndex].subscription        = sub
+        ofNodeModel.state.inputs[toInputIndex].subscription     = sub
+        self.state.outputs[outputIndex].subscription            = sub
     }
 }
 
 //MARK: Disconnect methods
 extension NodeModel{
     
-    func disconnect(inputIndex: Int){
+    public func disconnect(inputIndex: Int) {
         state.inputs[inputIndex].subscription?.cancel()
     }
     
-    func disconnect(outputIndex: Int){
+    public func disconnect(outputIndex: Int) {
         state.outputs[outputIndex].subscription?.cancel()
     }
     
-    func disconnectAll(){
-        state.inputs.forEach{
+    public func disconnectAll() {
+        
+        state.inputs.forEach {
             $0.subscription?.cancel()
         }
         
-        state.outputs.forEach{
+        state.outputs.forEach {
             $0.subscription?.cancel()
         }
     }

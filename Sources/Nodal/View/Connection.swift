@@ -16,14 +16,48 @@ struct Connection {
         self.anchorOne = anchorOne
         self.anchorTwo = anchorTwo
         self.connectionShape = connectionShape
-        distrubuteConnections()
+        distrubuteConnection()
     }
     
     var connectionShape: CAShapeLayer
     var anchorOne: ConnectionAnchor
     var anchorTwo: ConnectionAnchor
     
-    func distrubuteConnections(){
+    func cancel(){
+        
+        switch anchorOne.connector.location {
+        case .INPUT:
+            
+            anchorOne
+                .node
+                .cancelInputConnection(to: anchorOne.connector)
+            
+            anchorTwo
+                .node
+                .cancelOuptutConnection(from: anchorTwo.connector)
+            
+            anchorOne.connector.associatedConnectionID = nil
+            anchorTwo.connector.associatedConnectionID = nil
+            
+        case .OUTPUT:
+            
+            anchorOne
+                .node
+                .cancelOuptutConnection(from: anchorOne.connector)
+            
+            anchorTwo
+                .node
+                .cancelInputConnection(to: anchorTwo.connector)
+
+            anchorOne.connector.associatedConnectionID = nil
+            anchorTwo.connector.associatedConnectionID = nil
+            
+        case .none:
+            break
+        }
+    }
+    
+    internal func distrubuteConnection(){
         
         switch anchorOne.connector.location {
         case .INPUT:
@@ -44,6 +78,9 @@ struct Connection {
                     from: anchorTwo.connector,
                     with: connectionShape)
             
+            anchorOne.connector.associatedConnectionID = connectionID
+            anchorTwo.connector.associatedConnectionID = connectionID
+            
         case .OUTPUT:
             
             anchorOne
@@ -61,6 +98,9 @@ struct Connection {
                     on: anchorOne.node,
                     to: anchorTwo.connector,
                     with: connectionShape)
+
+            anchorOne.connector.associatedConnectionID = connectionID
+            anchorTwo.connector.associatedConnectionID = connectionID
             
         case .none:
             break

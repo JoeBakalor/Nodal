@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct NodeOperationOption<T>{
+public struct NodeOperationOption<T>{
     var name: String
 }
 
-enum SelectionStyle{
+public enum SelectionStyle{
     case picker
     case userEntry
 }

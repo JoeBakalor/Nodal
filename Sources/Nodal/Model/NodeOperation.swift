@@ -8,7 +8,7 @@
 import Foundation
 
 
-protocol NodeOperation {
+public protocol NodeOperation {
     associatedtype InputType
     associatedtype OutputType
     func process(state: NodeState<InputType, OutputType>)
