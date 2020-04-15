@@ -12,6 +12,8 @@ public protocol NodeOperation {
     associatedtype InputType
     associatedtype OutputType
     func process(state: NodeState<InputType, OutputType>)
-    var numberInputs: Int { get }
-    var numberOutputs: Int { get }
+    static var numberInputs: Int { get }
+    static var numberOutputs: Int { get }
+    static var operation: Operation { get }
+    init()
 }

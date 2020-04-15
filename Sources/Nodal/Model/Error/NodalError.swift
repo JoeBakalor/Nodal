@@ -8,5 +8,5 @@
 import Foundation
 
 enum NodalError: Error{
-    
+    case TYPE_MISMATCH
 }

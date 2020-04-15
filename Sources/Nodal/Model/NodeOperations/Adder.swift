@@ -7,13 +7,16 @@
 
 import Foundation
 
-class Adder: NodeOperation{
 
+class Adder: NodeOperation {
+    
+    static var operation: Operation = .adder
+    
     typealias InputType = Double
     typealias OutputType = Double
 
-    var numberInputs: Int = 2
-    var numberOutputs: Int = 1
+    static var numberInputs: Int = 2
+    static var numberOutputs: Int = 1
     
     func process(state: NodeState<InputType, OutputType>) {
         
@@ -24,6 +27,10 @@ class Adder: NodeOperation{
     
         state.outputs[0].value = inputOne + inputTwo
         print("Output updated: \(String(describing: state.outputs[0].value))")
+    }
+    
+    required init(){
+        
     }
 }
 

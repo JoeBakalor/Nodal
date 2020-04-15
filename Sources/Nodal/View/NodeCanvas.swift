@@ -217,25 +217,34 @@ extension NodeCanvas{
     @objc
     func addNode(){
         
-        let newNode = NodeView(numInputs: 3, numOutputs: 1)
-        self.addSubview(newNode)
-        
-        newNode.frame =
-            CGRect(
-                x: self.bounds.midX,
-                y: self.bounds.midY,
-                width: 100,
-                height: 80)
-        
-        subs.append(newNode.$desiredCoordinates
-            .sink { (newPoint) in
-                let converted = self.convert(newPoint, from: newNode)
-                newNode.center = converted
-                self.updateConnections(for: newNode)
-        })
-        
-        nodes.append(newNode)
-        layoutSubviews()
+        do {
+            let newNode = try NodeView(nodeOperation: Adder.self)
+            self.addSubview(newNode)
+            
+            newNode.frame =
+                CGRect(
+                    x: self.bounds.midX,
+                    y: self.bounds.midY,
+                    width: 100,
+                    height: 80)
+            
+            subs.append(newNode.$desiredCoordinates
+                .sink { (newPoint) in
+                    let converted = self.convert(newPoint, from: newNode)
+                    newNode.center = converted
+                    self.updateConnections(for: newNode)
+            })
+            
+            nodes.append(newNode)
+            layoutSubviews()
+        }
+        catch let error as NodalError{
+            print(error)
+        }
+        catch let error{
+            print(error)
+        }
+
     }
 
 }

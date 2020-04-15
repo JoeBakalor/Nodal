@@ -10,7 +10,6 @@ import UIKit
 
 open class NodePicker: UIView {
     
-    
     public convenience init() {
         self.init(frame: CGRect.zero)
         self.initView()

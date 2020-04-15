@@ -8,6 +8,24 @@ import UIKit
 import Foundation
 import Combine
 
+open class NodeFactory{
+    
+    func node(for type: Operation) -> NodeView {
+        switch type{
+        case .adder: return AdderNode(nodeOperation: Adder.self)
+        case .divider: return DividerNode(nodeOperation: Divider.self)
+        }
+    }
+}
+
+open class AdderNode: NodeView {
+    var nodeModel: NodeModel<Adder> = try! NodeModel(nodeOperation: Adder.self)
+}
+
+open class DividerNode: NodeView {
+    var nodeModel: NodeModel<Divider> = try! NodeModel(nodeOperation: Divider.self)
+}
+
 open class NodeView: UIView {
     
     @Published var desiredCoordinates: CGPoint  = .zero
@@ -19,10 +37,10 @@ open class NodeView: UIView {
         }
     }
     
-    private var panModeRect: CGRect             = .zero
-    private var normalModeRect: CGRect          = .zero
-    var inputConnectors: [Connector]    = []
-    var outputConnectors: [Connector]   = []
+    private var panModeRect: CGRect                                     = .zero
+    private var normalModeRect: CGRect                                  = .zero
+    var inputConnectors: [Connector]                                    = []
+    var outputConnectors: [Connector]                                   = []
     var inputConnections: [Int: (CAShapeLayer, NodeView, Connector)]    = [:]
     var outputConnections: [Int: (CAShapeLayer, NodeView, Connector)]   = [:]
     
@@ -30,8 +48,9 @@ open class NodeView: UIView {
     private let backgroundShape                 = CAShapeLayer()
     
     // Model
-    private var nodeModel: NodeModel<Any,Any>?
-
+    private var nodeModel: Any?
+    public var operation: Operation?
+    
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initView()
@@ -41,18 +60,18 @@ open class NodeView: UIView {
         super.init(frame: frame)
         self.initView()
     }
-
+    
     //  Used for full operation
-    public convenience init<T: NodeOperation>(nodeOperation: T) throws {
+    public convenience init<T: NodeOperation>(nodeOperation: T.Type){
         self.init(frame: CGRect.zero)
-        
+
         if nodeOperation.numberInputs > 0 {
             for i in 0...nodeOperation.numberInputs - 1 {
                 let connector = Connector(index: i, location: .INPUT)
                 inputConnectors.append(connector)
             }
         }
-        
+
         if nodeOperation.numberOutputs > 0 {
             for i in 0...nodeOperation.numberOutputs - 1 {
                 let connector = Connector(index: i, location: .OUTPUT)
@@ -60,15 +79,10 @@ open class NodeView: UIView {
             }
         }
         
-        do {
-            nodeModel = try NodeModel(nodeOperation: nodeOperation)
-        }
-        catch let error as NodalError {
-            throw error
-        }
-        
+        operation = nodeOperation.operation
         self.initView()
     }
+    
     
     //  Allow for pure UI testing
     public convenience init(numInputs: Int, numOutputs: Int) {
@@ -87,7 +101,6 @@ open class NodeView: UIView {
                 outputConnectors.append(connector)
             }
         }
-
         self.initView()
     }
 

@@ -8,12 +8,14 @@
 import Foundation
 
 class Divider: NodeOperation{
-
+    
+    static var operation: Operation = .divider
+    
     typealias InputType = Double
     typealias OutputType = Double
 
-    var numberInputs: Int = 2
-    var numberOutputs: Int = 1
+    static var numberInputs: Int = 2
+    static var numberOutputs: Int = 1
     
     func process(state: NodeState<InputType, OutputType>) {
         
@@ -24,5 +26,9 @@ class Divider: NodeOperation{
         print(inputOne)
         print(inputTwo)
         state.outputs[0].value = inputOne/inputTwo
+    }
+    
+    required init(){
+        
     }
 }

@@ -8,24 +8,25 @@
 import Foundation
 import Combine
 
-open class NodeModel<InputType, OutputType> {
-    
-    private var _nodeOperation: (NodeState<InputType, OutputType>) -> Void
-    private var state: NodeState<InputType, OutputType>
-    
-    public init<T: NodeOperation>(nodeOperation: T) throws {
-        
-        state = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
 
-        guard let op = { (nodeState) in
-            nodeOperation.self.process(state: nodeState)
-            } as? (NodeState<InputType, OutputType>) -> Void else { throw NSError.init() }
+open class NodeModel<T: NodeOperation> {
+
+    private var _nodeOperation: (NodeState<T.InputType, T.OutputType>) -> Void
+    public var state: NodeState<T.InputType, T.OutputType>
+    
+    public init(nodeOperation: T.Type) throws {
         
-        _nodeOperation = op
+        state           = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
+        let no          = nodeOperation.init()
+        _nodeOperation  = { nodeState in no.process(state: nodeState) }
     }
     
-    private func process() {
+    public func process() {
         _nodeOperation(state)
+    }
+    
+    public func type() -> NodeModel.Type {
+        return NodeModel<T>.self
     }
 }
 
@@ -36,7 +37,7 @@ extension NodeModel{
         
          let sub = ofNodeModel.state.outputs[toOutputIndex].$value
             .sink { (value) in
-                if let val = value as? InputType {
+                if let val = value as? T.InputType {
                     self.state.inputs[inputIndex].value = val
                     self.process()
             }
@@ -50,7 +51,7 @@ extension NodeModel{
         
         let sub = state.outputs[outputIndex].$value
             .sink { (value) in
-                if let val = value as? InputType {
+                if let val = value as? T.InputType {
                     ofNodeModel.state.inputs[toInputIndex].value = val
                     ofNodeModel.process()
             }
