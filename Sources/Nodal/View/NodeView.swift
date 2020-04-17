@@ -8,23 +8,6 @@ import UIKit
 import Foundation
 import Combine
 
-open class NodeFactory{
-    
-    func node(for type: Operation) -> NodeView {
-        switch type{
-        case .adder: return AdderNode(nodeOperation: Adder.self)
-        case .divider: return DividerNode(nodeOperation: Divider.self)
-        }
-    }
-}
-
-open class AdderNode: NodeView {
-    var nodeModel: NodeModel<Adder> = try! NodeModel(nodeOperation: Adder.self)
-}
-
-open class DividerNode: NodeView {
-    var nodeModel: NodeModel<Divider> = try! NodeModel(nodeOperation: Divider.self)
-}
 
 open class NodeView: UIView {
     

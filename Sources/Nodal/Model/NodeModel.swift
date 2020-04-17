@@ -8,36 +8,51 @@
 import Foundation
 import Combine
 
+open class NodeModel {
 
-open class NodeModel<T: NodeOperation> {
-
-    private var _nodeOperation: (NodeState<T.InputType, T.OutputType>) -> Void
-    public var state: NodeState<T.InputType, T.OutputType>
+    private var _nodeOperation                   : (NodeState) -> Void
+    public var state                             : NodeState
+    public var inputTypeCompatibilityCheck       : ((Any) -> Bool)
     
-    public init(nodeOperation: T.Type) throws {
+    public init<T: NodeOperation>(nodeOperation: T.Type) throws {
         
+        // Init state
         state           = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
         let no          = nodeOperation.init()
         _nodeOperation  = { nodeState in no.process(state: nodeState) }
+        
+        // Set state defaults
+        no.setDefaults(state: self.state)
+        
+        // Add type checking
+        inputTypeCompatibilityCheck = { (valueToAccept) in
+            if valueToAccept is T.InputType{
+                return true
+            }
+            else {
+                return false
+            }
+        }
     }
     
     public func process() {
         _nodeOperation(state)
     }
     
-    public func type() -> NodeModel.Type {
-        return NodeModel<T>.self
-    }
 }
 
 //MARK: Connect methods
 extension NodeModel{
     
     public func connect(inputIndex: Int, toOutputIndex: Int, ofNodeModel: NodeModel) throws {
+    
+        guard self.inputTypeCompatibilityCheck(ofNodeModel.state.outputs[toOutputIndex].value as Any) else {
+            throw NodalError.TYPE_MISMATCH
+        }
         
-         let sub = ofNodeModel.state.outputs[toOutputIndex].$value
+        let sub = ofNodeModel.state.outputs[toOutputIndex].$value
             .sink { (value) in
-                if let val = value as? T.InputType {
+                if let val = value {
                     self.state.inputs[inputIndex].value = val
                     self.process()
             }
@@ -49,9 +64,13 @@ extension NodeModel{
 
     public func connect(outputIndex: Int, toInputIndex: Int, ofNodeModel: NodeModel) throws {
         
+        guard ofNodeModel.inputTypeCompatibilityCheck(self.state.outputs[outputIndex].value as Any) else {
+            throw NodalError.TYPE_MISMATCH
+        }
+        
         let sub = state.outputs[outputIndex].$value
             .sink { (value) in
-                if let val = value as? T.InputType {
+                if let val = value {
                     ofNodeModel.state.inputs[toInputIndex].value = val
                     ofNodeModel.process()
             }

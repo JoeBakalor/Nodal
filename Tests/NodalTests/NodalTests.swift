@@ -1,7 +1,7 @@
 import XCTest
 @testable import Nodal
 
-final class NodalTests: XCTestCase {
+open final class NodalTests: XCTestCase {
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
@@ -12,7 +12,7 @@ final class NodalTests: XCTestCase {
     func testAdder(){
         
         do {
-            let adderNode = try NodeModel<Adder.InputType, Adder.OutputType>(nodeOperation: Adder())
+            let adderNode = try NodeModel<Adder.InputType, Adder.OutputType>(nodeOperation: Adder)
             adderNode.state.inputs[0].value = 5.0
             adderNode.state.inputs[1].value = 4.0
             adderNode.process()
