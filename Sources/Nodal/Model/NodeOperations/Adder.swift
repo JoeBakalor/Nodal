@@ -19,7 +19,7 @@ class Adder: NodeOperation {
     static var numberOutputs: Int = 1
     
     func process(state: NodeState) {
-        
+        checkConnections(state: NodeState)
         guard
             let inputOne = state.inputs[0].value as? InputType,
             let inputTwo =  state.inputs[1].value as? InputType
@@ -30,9 +30,14 @@ class Adder: NodeOperation {
     }
     
     func setDefaults(state: NodeState) {
-        state.inputs[0].value = Double(0)
-        state.inputs[1].value = Double(0)
-        state.outputs[0].value = Double(0)
+        state.inputs[0].value = Double(5)
+        state.inputs[1].value = Double(5)
+        state.outputs[0].value = Double(10)
+        process(state: state)
+    }
+    
+    func checkConnections() {
+         
     }
     
     required init(){

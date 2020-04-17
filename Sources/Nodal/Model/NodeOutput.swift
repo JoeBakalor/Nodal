@@ -10,4 +10,7 @@ import Combine
 
 open class NodeOutput<OutputType>: NodeTerminal<OutputType> {
     public var subscription: AnyCancellable?
+    var hasConnection: Bool {
+        return subscription != nil
+    }
 }

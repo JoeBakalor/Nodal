@@ -10,4 +10,7 @@ import Combine
 
 open class NodeInput<InputType>: NodeTerminal<InputType> {
     public var subscription: AnyCancellable?
+    var hasConnection: Bool {
+        return subscription != nil
+    }
 }

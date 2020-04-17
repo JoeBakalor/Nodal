@@ -8,7 +8,7 @@
 import Foundation
 
 class Divider: NodeOperation{
-    
+
     static var operation: Operation = .divider
     
     typealias InputType = Double
@@ -28,9 +28,14 @@ class Divider: NodeOperation{
     }
     
     func setDefaults(state: NodeState){
-        state.inputs[0].value = Double(0)
-        state.inputs[1].value = Double(0)
-        state.outputs[0].value = Double(0)
+        state.inputs[0].value = Double(5)
+        state.inputs[1].value = Double(5)
+        state.outputs[0].value = Double(1)
+        process(state: state)
+    }
+    
+    func checkConnections() {
+         
     }
     
     required init(){

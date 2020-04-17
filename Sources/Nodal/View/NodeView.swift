@@ -20,6 +20,9 @@ open class NodeView: UIView {
         }
     }
     
+    // Shape layers
+    private let backgroundShape                 = CAShapeLayer()
+    
     private var panModeRect: CGRect                                     = .zero
     private var normalModeRect: CGRect                                  = .zero
     var inputConnectors: [Connector]                                    = []
@@ -27,12 +30,8 @@ open class NodeView: UIView {
     var inputConnections: [Int: (CAShapeLayer, NodeView, Connector)]    = [:]
     var outputConnections: [Int: (CAShapeLayer, NodeView, Connector)]   = [:]
     
-    // Shape layers
-    private let backgroundShape                 = CAShapeLayer()
-    
     // Model
-    private var nodeModel: Any?
-    public var operation: Operation?
+    private var nodeModel: NodeModel!
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -47,7 +46,17 @@ open class NodeView: UIView {
     //  Used for full operation
     public convenience init<T: NodeOperation>(nodeOperation: T.Type){
         self.init(frame: CGRect.zero)
-
+        
+        do {
+            nodeModel = try NodeModel(nodeOperation: nodeOperation)
+        }
+        catch let error as NodalError {
+            print(error)
+        }
+        catch let error {
+            print(error)
+        }
+        
         if nodeOperation.numberInputs > 0 {
             for i in 0...nodeOperation.numberInputs - 1 {
                 let connector = Connector(index: i, location: .INPUT)
@@ -62,28 +71,6 @@ open class NodeView: UIView {
             }
         }
         
-        operation = nodeOperation.operation
-        self.initView()
-    }
-    
-    
-    //  Allow for pure UI testing
-    public convenience init(numInputs: Int, numOutputs: Int) {
-        self.init(frame: CGRect.zero)
-        
-        if numInputs > 0 {
-            for i in 0...numInputs - 1 {
-                let connector = Connector(index: i, location: .INPUT)
-                inputConnectors.append(connector)
-            }
-        }
-        
-        if numOutputs > 0 {
-            for i in 0...numOutputs - 1 {
-                let connector = Connector(index: i, location: .OUTPUT)
-                outputConnectors.append(connector)
-            }
-        }
         self.initView()
     }
 
@@ -98,18 +85,41 @@ open class NodeView: UIView {
     
     func cancelInputConnection(to ourConnector: Connector){
         inputConnections.removeValue(forKey: ourConnector.index)
+        nodeModel?.disconnect(inputIndex: ourConnector.index)
     }
     
     func newInputConnection(from connector: Connector, on nodeView: NodeView, to ourConnector: Connector, with connectionLayer: CAShapeLayer) {
         inputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
+        
+        do {
+            try nodeModel?.connect(inputIndex: ourConnector.index, toOutputIndex: connector.index, ofNodeModel: nodeView.nodeModel)
+        }
+        catch let error as NodalError {
+            print(error)
+        }
+        catch let error {
+            print(error)
+        }
     }
     
     func cancelOuptutConnection(from ourConnector: Connector){
         outputConnections.removeValue(forKey: ourConnector.index)
+        nodeModel?.disconnect(outputIndex: ourConnector.index)
     }
     
     func newOutputConnection(to connector: Connector, on nodeView: NodeView, from ourConnector: Connector, with connectionLayer: CAShapeLayer) {
         outputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
+        
+        do {
+            try nodeModel?.connect(outputIndex: ourConnector.index, toInputIndex: connector.index, ofNodeModel: nodeView.nodeModel)
+        }
+        catch let error as NodalError {
+            print(error)
+        }
+        catch let error {
+            print(error)
+        }
+        
     }
 }
 

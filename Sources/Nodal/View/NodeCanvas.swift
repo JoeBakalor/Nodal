@@ -218,7 +218,7 @@ extension NodeCanvas{
     func addNode(){
         
         do {
-            let newNode = try NodeView(nodeOperation: Adder.self)
+            let newNode = NodeView(nodeOperation: Adder.self)
             self.addSubview(newNode)
             
             newNode.frame =
@@ -237,12 +237,6 @@ extension NodeCanvas{
             
             nodes.append(newNode)
             layoutSubviews()
-        }
-        catch let error as NodalError{
-            print(error)
-        }
-        catch let error{
-            print(error)
         }
 
     }
