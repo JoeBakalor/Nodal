@@ -11,15 +11,13 @@ import Foundation
 class Adder: NodeOperation {
 
     static var operation: Operation = .adder
-    
-    typealias InputType = Double
-    typealias OutputType = Double
-
-    static var numberInputs: Int = 2
-    static var numberOutputs: Int = 1
+    typealias InputType             = Double
+    typealias OutputType            = Double
+    static var numberInputs: Int    = 2
+    static var numberOutputs: Int   = 1
     
     func process(state: NodeState) {
-        checkConnections(state: NodeState)
+        setDefaults(state: state)
         guard
             let inputOne = state.inputs[0].value as? InputType,
             let inputTwo =  state.inputs[1].value as? InputType
@@ -29,15 +27,16 @@ class Adder: NodeOperation {
         print("Output updated: \(String(describing: state.outputs[0].value))")
     }
     
+    //If no connection, set default value
     func setDefaults(state: NodeState) {
-        state.inputs[0].value = Double(5)
-        state.inputs[1].value = Double(5)
-        state.outputs[0].value = Double(10)
-        process(state: state)
-    }
-    
-    func checkConnections() {
-         
+        
+        state.inputs.forEach{
+            switch $0.index{
+            case 0: if !$0.hasConnection { $0.value = Double(5) }
+            case 1: if !$0.hasConnection { $0.value = Double(5) }
+            default: break
+            }
+        }
     }
     
     required init(){

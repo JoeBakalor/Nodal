@@ -24,6 +24,8 @@ open class NodeCanvas: UIView {
     // On first connector selected this is initialized
     private var pendingConnectionAnchor          : ConnectionAnchor?
     
+    private var nodePickerExpanded = false
+    
     public convenience init() {
         self.init(frame: CGRect.zero)
         self.initView()
@@ -46,11 +48,59 @@ open class NodeCanvas: UIView {
         pendingConnectionShape.strokeColor = NodalConfiguration.connectionColor.cgColor
         pendingConnectionShape.lineWidth = NodalConfiguration.connectionThickness
         self.layer.addSublayer(pendingConnectionShape)
+        self.addSubview(nodePicker)
+        nodePicker.delegate = self
+        nodePicker.onClick {
+            self.toggleNodePicker()
+        }
+    }
+    
+    func toggleNodePicker(){
+
+        nodePickerExpanded.toggle()
+        UIView.animate(withDuration: 0.75){
+            self.layoutSubviews()
+        }
     }
     
     override open func layoutSubviews() {
         super.layoutSubviews()
+        nodePicker.frame.size = CGSize(width: 500,height: 500)
+        nodePicker.center = self.center
+        if nodePickerExpanded == false {
+            nodePicker.frame.origin.y = self.bounds.maxY - 500*0.1
+        }
     }
+}
+
+extension NodeCanvas: NodePickerDelegate{
+    
+    public func selectedOperation(operation: Operation) {
+
+        let newNode = operation.nodeView()
+        self.addSubview(newNode)
+             
+            newNode.frame =
+                CGRect(
+                x: self.bounds.midX,
+                y: self.bounds.midY,
+                width: 100,
+                height: 80)
+             
+        subs.append(newNode.$desiredCoordinates
+            .sink { (newPoint) in
+                let converted = self.convert(newPoint, from: newNode)
+                newNode.center = converted
+                self.updateConnections(for: newNode)
+        })
+             
+        nodes.append(newNode)
+        layoutSubviews()
+        toggleNodePicker()
+        self.bringSubviewToFront(nodePicker)
+    }
+    
+    
 }
 
 //MARK: Connection management
@@ -146,6 +196,9 @@ extension NodeCanvas{
                 // Can't make a connection if we don't have a touch down location
                 guard let from = touchDownLocation else { return }
                 
+                // Can't connect input side to input side
+                guard pendingConnectionAnchor?.connector.location != connector.location else { return }
+                
                 let touchEnd = convert(connector.center, from: node)
                 let anchorTwo = ConnectionAnchor(node: node, connector: connector)
                 let connectionShape = addConnection(from: from, to: touchEnd)
@@ -217,27 +270,27 @@ extension NodeCanvas{
     @objc
     func addNode(){
         
-        do {
-            let newNode = NodeView(nodeOperation: Adder.self)
-            self.addSubview(newNode)
-            
-            newNode.frame =
-                CGRect(
-                    x: self.bounds.midX,
-                    y: self.bounds.midY,
-                    width: 100,
-                    height: 80)
-            
-            subs.append(newNode.$desiredCoordinates
-                .sink { (newPoint) in
-                    let converted = self.convert(newPoint, from: newNode)
-                    newNode.center = converted
-                    self.updateConnections(for: newNode)
-            })
-            
-            nodes.append(newNode)
-            layoutSubviews()
-        }
+//        do {
+//            let newNode = NodeView(nodeOperation: Constant.self)
+//            self.addSubview(newNode)
+//
+//            newNode.frame =
+//                CGRect(
+//                    x: self.bounds.midX,
+//                    y: self.bounds.midY,
+//                    width: 100,
+//                    height: 80)
+//
+//            subs.append(newNode.$desiredCoordinates
+//                .sink { (newPoint) in
+//                    let converted = self.convert(newPoint, from: newNode)
+//                    newNode.center = converted
+//                    self.updateConnections(for: newNode)
+//            })
+//
+//            nodes.append(newNode)
+//            layoutSubviews()
+//        }
 
     }
 

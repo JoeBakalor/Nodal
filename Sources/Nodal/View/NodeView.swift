@@ -29,6 +29,11 @@ open class NodeView: UIView {
     var outputConnectors: [Connector]                                   = []
     var inputConnections: [Int: (CAShapeLayer, NodeView, Connector)]    = [:]
     var outputConnections: [Int: (CAShapeLayer, NodeView, Connector)]   = [:]
+    var inputLabels: [UILabel]                                          = []
+    var outputLabels: [UILabel]                                         = []
+    
+    //Need to be cancelled when deleting node
+    var subs: [AnyCancellable]                                          = []
     
     // Model
     private var nodeModel: NodeModel!
@@ -60,14 +65,35 @@ open class NodeView: UIView {
         if nodeOperation.numberInputs > 0 {
             for i in 0...nodeOperation.numberInputs - 1 {
                 let connector = Connector(index: i, location: .INPUT)
+                let label = UILabel()
+                label.text = "0.0"
                 inputConnectors.append(connector)
+                inputLabels.append(label)
+                
+                // Display input values
+                let sub = nodeModel.state.inputs[i].$value.sink { (value) in
+                    guard let val = value else { return }
+                    self.inputLabels[i].text = "\(val)"
+                    self.inputLabels[i].sizeToFit()
+                }
+                subs.append(sub)
             }
         }
 
         if nodeOperation.numberOutputs > 0 {
             for i in 0...nodeOperation.numberOutputs - 1 {
                 let connector = Connector(index: i, location: .OUTPUT)
+                let label = UILabel()
                 outputConnectors.append(connector)
+                outputLabels.append(label)
+                
+                // Display output values
+                let sub = nodeModel.state.outputs[i].$value.sink { (value) in
+                    guard let val = value else { return }
+                    self.outputLabels[i].text = "\(val)"
+                    self.outputLabels[i].sizeToFit()
+                }
+                subs.append(sub)
             }
         }
         
@@ -81,6 +107,12 @@ open class NodeView: UIView {
                 self.addSubview($0)
             }
         }
+        
+        [inputLabels, outputLabels].forEach{
+            $0.forEach {
+                self.addSubview($0)
+            }
+        }
     }
     
     func cancelInputConnection(to ourConnector: Connector){
@@ -88,17 +120,18 @@ open class NodeView: UIView {
         nodeModel?.disconnect(inputIndex: ourConnector.index)
     }
     
-    func newInputConnection(from connector: Connector, on nodeView: NodeView, to ourConnector: Connector, with connectionLayer: CAShapeLayer) {
+    func newInputConnection(from connector: Connector, on nodeView: NodeView, to ourConnector: Connector, with connectionLayer: CAShapeLayer) throws {
+        
         inputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
         
         do {
             try nodeModel?.connect(inputIndex: ourConnector.index, toOutputIndex: connector.index, ofNodeModel: nodeView.nodeModel)
         }
         catch let error as NodalError {
-            print(error)
+            throw error
         }
-        catch let error {
-            print(error)
+        catch _ {
+            throw NodalError.UNEXPECTED
         }
     }
     
@@ -107,7 +140,7 @@ open class NodeView: UIView {
         nodeModel?.disconnect(outputIndex: ourConnector.index)
     }
     
-    func newOutputConnection(to connector: Connector, on nodeView: NodeView, from ourConnector: Connector, with connectionLayer: CAShapeLayer) {
+    func newOutputConnection(to connector: Connector, on nodeView: NodeView, from ourConnector: Connector, with connectionLayer: CAShapeLayer) throws {
         outputConnections[ourConnector.index] = (connectionLayer, nodeView, connector)
         
         do {
@@ -166,6 +199,14 @@ extension NodeView{
                         y: H/2 - (NodalConfiguration.connectorSize.width/2)),
                     size: NodalConfiguration.connectorSize)
             
+            inputLabels[0].sizeToFit()
+            inputLabels[0].frame =
+                    CGRect(
+                        x: inputConnectors[0].frame.maxX,
+                        y: inputConnectors[0].frame.minY,
+                        width: inputLabels[0].frame.size.width,
+                        height: inputLabels[0].frame.size.height)
+            
             print(inputConnectors[0].frame.origin)
             
         }
@@ -183,6 +224,14 @@ extension NodeView{
                             x: 0,
                             y: CGFloat($0.offset)*inputSpacing + (NodalConfiguration.connectorSize.width/2)),
                         size: NodalConfiguration.connectorSize)
+                
+                inputLabels[$0.offset].sizeToFit()
+                inputLabels[$0.offset].frame =
+                        CGRect(
+                            x: $0.element.frame.maxX,
+                            y: $0.element.frame.minY,
+                            width: inputLabels[$0.offset].frame.size.width,
+                            height: inputLabels[$0.offset].frame.size.height)
             }
         }
         
@@ -195,6 +244,14 @@ extension NodeView{
                         x: W - (NodalConfiguration.connectorSize.width),
                         y: H/2 - (NodalConfiguration.connectorSize.width/2)),
                     size: NodalConfiguration.connectorSize)
+            
+            outputLabels[0].sizeToFit()
+            outputLabels[0].frame =
+                    CGRect(
+                        x: outputConnectors[0].frame.minX - outputLabels[0].frame.size.width,
+                        y: outputConnectors[0].frame.minY,
+                        width: outputLabels[0].frame.size.width,
+                        height: outputLabels[0].frame.size.height)
         }
         else {
             
@@ -210,6 +267,14 @@ extension NodeView{
                             x: W - (NodalConfiguration.connectorSize.width),
                             y: CGFloat($0.offset)*outputSpacing + (NodalConfiguration.connectorSize.width/2)),
                         size: NodalConfiguration.connectorSize)
+                    
+                outputLabels[$0.offset].sizeToFit()
+                outputLabels[$0.offset].frame =
+                        CGRect(
+                            x: $0.element.frame.minX - outputLabels[$0.offset].frame.size.width,
+                            y: $0.element.frame.minY,
+                            width: outputLabels[$0.offset].frame.size.width,
+                            height: outputLabels[$0.offset].frame.size.height)
             }
         }
         

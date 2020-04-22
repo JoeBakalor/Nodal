@@ -7,6 +7,7 @@
 
 import Foundation
 
-enum NodalError: Error{
+enum NodalError: Error {
+    case UNEXPECTED
     case TYPE_MISMATCH
 }

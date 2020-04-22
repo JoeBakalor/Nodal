@@ -7,16 +7,19 @@
 
 import Foundation
 
-public enum Operation: String{
-    case adder = "Adder"
-    case divider = "Divider"
+public enum Operation: String, CaseIterable {
     
-//    var type: NodeOperation {
-//        switch self {
-//        case .adder:
-//            return Adder()
-//        case .divider:
-//            return Divider()
-//        }
-//    }
+    case adder      = "Adder"
+    case divider    = "Divider"
+    case constant   = "Constant"
+    case and        = "And"
+    
+    func nodeView() -> NodeView{
+        switch self{
+        case .adder:        return NodeView(nodeOperation: Adder.self)
+        case .divider:      return NodeView(nodeOperation: Divider.self)
+        case .constant:     return NodeView(nodeOperation: Constant.self)
+        case .and:          return NodeView(nodeOperation: And.self)
+        }
+    }
 }

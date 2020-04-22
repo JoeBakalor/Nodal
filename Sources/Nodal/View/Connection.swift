@@ -57,29 +57,39 @@ struct Connection {
         }
     }
     
-    internal func distrubuteConnection(){
+    internal func distrubuteConnection() throws {
         
         switch anchorOne.connector.location {
         case .INPUT:
             
-            anchorOne
-                .node
-                .newInputConnection(
-                    from: anchorTwo.connector,
-                    on: anchorTwo.node,
-                    to: anchorOne.connector,
-                    with: connectionShape)
-            
-            anchorTwo
-                .node
-                .newOutputConnection(
-                    to: anchorOne.connector,
-                    on: anchorOne.node,
-                    from: anchorTwo.connector,
-                    with: connectionShape)
-            
-            anchorOne.connector.associatedConnectionID = connectionID
-            anchorTwo.connector.associatedConnectionID = connectionID
+            do {
+                try
+                anchorOne
+                    .node
+                    .newInputConnection(
+                        from: anchorTwo.connector,
+                        on: anchorTwo.node,
+                        to: anchorOne.connector,
+                        with: connectionShape)
+                try
+                anchorTwo
+                    .node
+                    .newOutputConnection(
+                        to: anchorOne.connector,
+                        on: anchorOne.node,
+                        from: anchorTwo.connector,
+                        with: connectionShape)
+                
+                anchorOne.connector.associatedConnectionID = connectionID
+                anchorTwo.connector.associatedConnectionID = connectionID
+            }
+            catch let error as NodalError {
+                throw error
+            }
+            catch _ {
+                throw NodalError.UNEXPECTED
+            }
+
             
         case .OUTPUT:
             

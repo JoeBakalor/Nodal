@@ -21,8 +21,7 @@ open class NodeModel {
         let no          = nodeOperation.init()
         _nodeOperation  = { nodeState in no.process(state: nodeState) }
         
-        // Set state defaults
-        no.setDefaults(state: self.state)
+        no.process(state: state)
         
         // Add type checking
         inputTypeCompatibilityCheck = { (valueToAccept) in
@@ -86,20 +85,28 @@ extension NodeModel{
     
     public func disconnect(inputIndex: Int) {
         state.inputs[inputIndex].subscription?.cancel()
+        state.inputs[inputIndex].subscription = nil
+        process()
     }
     
     public func disconnect(outputIndex: Int) {
         state.outputs[outputIndex].subscription?.cancel()
+        state.outputs[outputIndex].subscription = nil
+        process()
     }
     
     public func disconnectAll() {
         
         state.inputs.forEach {
             $0.subscription?.cancel()
+            $0.subscription = nil
         }
         
         state.outputs.forEach {
             $0.subscription?.cancel()
+            $0.subscription = nil
         }
+        
+        process()
     }
 }
