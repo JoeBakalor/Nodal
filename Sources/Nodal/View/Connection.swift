@@ -12,11 +12,21 @@ struct Connection {
     
     var connectionID = UUID.init()
     
-    init(anchorOne: ConnectionAnchor, anchorTwo: ConnectionAnchor, connectionShape: CAShapeLayer) {
+    init(anchorOne: ConnectionAnchor, anchorTwo: ConnectionAnchor, connectionShape: CAShapeLayer) throws {
         self.anchorOne = anchorOne
         self.anchorTwo = anchorTwo
         self.connectionShape = connectionShape
-        distrubuteConnection()
+        
+        do {
+            try
+            distrubuteConnection()
+        }
+        catch let error as NodalError {
+            throw error
+        }
+        catch _ {
+            throw NodalError.UNEXPECTED
+        }
     }
     
     var connectionShape: CAShapeLayer
@@ -93,24 +103,33 @@ struct Connection {
             
         case .OUTPUT:
             
-            anchorOne
-                .node
-                .newOutputConnection(
-                    to: anchorTwo.connector,
-                    on: anchorTwo.node,
-                    from: anchorOne.connector,
-                    with: connectionShape)
-            
-            anchorTwo
-                .node
-                .newInputConnection(
-                    from: anchorOne.connector,
-                    on: anchorOne.node,
-                    to: anchorTwo.connector,
-                    with: connectionShape)
+            do {
+                try
+                anchorOne
+                    .node
+                    .newOutputConnection(
+                        to: anchorTwo.connector,
+                        on: anchorTwo.node,
+                        from: anchorOne.connector,
+                        with: connectionShape)
+                try
+                anchorTwo
+                    .node
+                    .newInputConnection(
+                        from: anchorOne.connector,
+                        on: anchorOne.node,
+                        to: anchorTwo.connector,
+                        with: connectionShape)
 
-            anchorOne.connector.associatedConnectionID = connectionID
-            anchorTwo.connector.associatedConnectionID = connectionID
+                anchorOne.connector.associatedConnectionID = connectionID
+                anchorTwo.connector.associatedConnectionID = connectionID
+            }
+            catch let error as NodalError {
+                throw error
+            }
+            catch _ {
+                throw NodalError.UNEXPECTED
+            }
             
         case .none:
             break

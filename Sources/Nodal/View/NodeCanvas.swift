@@ -194,7 +194,7 @@ extension NodeCanvas{
                 guard connector.associatedConnectionID == nil else { return }
                 
                 // Can't make a connection if we don't have a touch down location
-                guard let from = touchDownLocation else { return }
+                guard let from = touchDownLocation, let anchorOne = pendingConnectionAnchor else { return }
                 
                 // Can't connect input side to input side
                 guard pendingConnectionAnchor?.connector.location != connector.location else { return }
@@ -203,10 +203,16 @@ extension NodeCanvas{
                 let anchorTwo = ConnectionAnchor(node: node, connector: connector)
                 let connectionShape = addConnection(from: from, to: touchEnd)
                 
-                if let anchorOne = pendingConnectionAnchor {
-                    let newConnection = Connection(anchorOne: anchorOne, anchorTwo: anchorTwo, connectionShape: connectionShape)
+                do {
+                    let newConnection = try Connection(anchorOne: anchorOne, anchorTwo: anchorTwo, connectionShape: connectionShape)
                     self.connections[newConnection.connectionID] = newConnection
                 }
+                catch let error as NodalError {
+                    connectionShape.removeFromSuperlayer()
+                    print(error)
+                }
+                catch _ {}
+                
             }
         }
         self.travelingTouchLocation = nil

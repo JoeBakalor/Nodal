@@ -147,10 +147,10 @@ open class NodeView: UIView {
             try nodeModel?.connect(outputIndex: ourConnector.index, toInputIndex: connector.index, ofNodeModel: nodeView.nodeModel)
         }
         catch let error as NodalError {
-            print(error)
+            throw error
         }
-        catch let error {
-            print(error)
+        catch _ {
+            throw NodalError.UNEXPECTED
         }
         
     }

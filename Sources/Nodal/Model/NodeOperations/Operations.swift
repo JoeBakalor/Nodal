@@ -13,6 +13,7 @@ public enum Operation: String, CaseIterable {
     case divider    = "Divider"
     case constant   = "Constant"
     case and        = "And"
+    case or         = "Or"
     
     func nodeView() -> NodeView{
         switch self{
@@ -20,6 +21,7 @@ public enum Operation: String, CaseIterable {
         case .divider:      return NodeView(nodeOperation: Divider.self)
         case .constant:     return NodeView(nodeOperation: Constant.self)
         case .and:          return NodeView(nodeOperation: And.self)
+        case .or:           return NodeView(nodeOperation: Or.self)
         }
     }
 }
