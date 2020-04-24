@@ -2,15 +2,14 @@
 //  File.swift
 //  
 //
-//  Created by Joe Bakalor on 3/6/20.
+//  Created by Joe Bakalor on 4/24/20.
 //
 
 import Foundation
 
+class Subtraction: NodeOperation {
 
-class Adder: NodeOperation {
-
-    static var operation: Operation = .adder
+    static var operation: Operation = .subtraction
     typealias InputType             = Double
     typealias OutputType            = Double
     static var numberInputs: Int    = 2
@@ -23,7 +22,7 @@ class Adder: NodeOperation {
             let inputTwo =  state.inputs[1].value as? InputType
             else { return }
         
-        state.outputs[0].value = (inputOne + inputTwo)
+        state.outputs[0].value = (inputOne - inputTwo)
         print("Output updated: \(String(describing: state.outputs[0].value))")
     }
     
@@ -45,4 +44,3 @@ class Adder: NodeOperation {
         
     }
 }
-

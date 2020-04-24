@@ -7,9 +7,9 @@
 
 import Foundation
 
-class Divider: NodeOperation{
+class Division: NodeOperation{
 
-    static var operation: Operation     = .divider
+    static var operation: Operation     = .division
     typealias InputType                 = Double
     typealias OutputType                = Double
     static var numberInputs: Int        = 2
