@@ -93,7 +93,6 @@ extension NodePicker: UITableViewDelegate, UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print(Operation.allCases.count)
         return Operation.allCases.count
     }
     

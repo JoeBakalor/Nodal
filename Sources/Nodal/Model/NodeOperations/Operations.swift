@@ -14,6 +14,7 @@ public enum Operation: String, CaseIterable {
     case constant   = "Constant"
     case and        = "And"
     case or         = "Or"
+    case not        = "Not"
     
     func nodeView() -> NodeView{
         switch self{
@@ -22,6 +23,7 @@ public enum Operation: String, CaseIterable {
         case .constant:     return NodeView(nodeOperation: Constant.self)
         case .and:          return NodeView(nodeOperation: And.self)
         case .or:           return NodeView(nodeOperation: Or.self)
+        case .not:          return NodeView(nodeOperation: Not.self)
         }
     }
 }

@@ -42,7 +42,7 @@ open class NodeCanvas: UIView {
     }
 
     open func initView() {
-        self.backgroundColor = UIColor.lightGray
+        self.backgroundColor = NodalConfiguration.canvasColor
         addTestGesture()
         pendingConnectionShape.fillColor = UIColor.clear.cgColor
         pendingConnectionShape.strokeColor = NodalConfiguration.connectionColor.cgColor

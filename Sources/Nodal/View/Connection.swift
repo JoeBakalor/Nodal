@@ -12,6 +12,10 @@ struct Connection {
     
     var connectionID = UUID.init()
     
+    var connectionShape : CAShapeLayer
+    var anchorOne       : ConnectionAnchor
+    var anchorTwo       : ConnectionAnchor
+    
     init(anchorOne: ConnectionAnchor, anchorTwo: ConnectionAnchor, connectionShape: CAShapeLayer) throws {
         self.anchorOne = anchorOne
         self.anchorTwo = anchorTwo
@@ -28,10 +32,6 @@ struct Connection {
             throw NodalError.UNEXPECTED
         }
     }
-    
-    var connectionShape: CAShapeLayer
-    var anchorOne: ConnectionAnchor
-    var anchorTwo: ConnectionAnchor
     
     func cancel(){
         
@@ -66,6 +66,7 @@ struct Connection {
             break
         }
     }
+    
     
     internal func distrubuteConnection() throws {
         
