@@ -36,17 +36,15 @@ class Not: NodeOperation {
         }
     }
     
-    func compile() -> String {
-        return
-        """
-        namespace nodal {
-        
-            bool not(bool bool_val)
-            {
-                return !bool_val;
-            }
-        }
-        """
+    func compile(state: NodeState) -> String {
+            """
+            
+                \(OutputType().cType()) not(\(InputType().cType()) arg1)
+                {
+                    return !arg1;
+                }
+            
+            """
     }
     
     required init(){

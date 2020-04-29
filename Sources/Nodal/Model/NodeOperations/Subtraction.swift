@@ -38,9 +38,21 @@ class Subtraction: NodeOperation {
         }
     }
     
+    func compile(state: NodeState) -> String {
+        """
+        
+            \(OutputType().cType()) subtract(\(InputType().cType()) arg1, \(InputType().cType()) arg2)
+            {
+                return (arg1 - arg2);
+            }
+        
+        """
+    }
     
     
     required init(){
         
     }
 }
+
+

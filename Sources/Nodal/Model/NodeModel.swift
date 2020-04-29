@@ -13,14 +13,16 @@ open class NodeModel {
     private var _nodeOperation                   : (NodeState) -> Void
     public var state                             : NodeState
     public var inputTypeCompatibilityCheck       : ((Any) -> Bool)
+    public var codeRepresentation                : String
     
     public init<T: NodeOperation>(nodeOperation: T.Type) throws {
         
         // Init state
-        state           = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
-        let no          = nodeOperation.init()
-        _nodeOperation  = { nodeState in no.process(state: nodeState) }
-        
+        state               = NodeState(numInputs: nodeOperation.numberInputs, numOutputs: nodeOperation.numberOutputs)
+        let no              = nodeOperation.init()
+        _nodeOperation      = { nodeState in no.process(state: nodeState) }
+        codeRepresentation  = no.compile(state: state)
+            
         no.process(state: state)
         
         // Add type checking

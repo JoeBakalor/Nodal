@@ -43,7 +43,6 @@ open class NodeCanvas: UIView {
 
     open func initView() {
         self.backgroundColor = NodalConfiguration.canvasColor
-        addTestGesture()
         pendingConnectionShape.fillColor = UIColor.clear.cgColor
         pendingConnectionShape.strokeColor = NodalConfiguration.connectionColor.cgColor
         pendingConnectionShape.lineWidth = NodalConfiguration.connectionThickness
@@ -98,6 +97,7 @@ extension NodeCanvas: NodePickerDelegate{
         layoutSubviews()
         toggleNodePicker()
         self.bringSubviewToFront(nodePicker)
+        print("Here's a program \(Nodal.generate(nodes: self.nodes, connections: self.connections))")
     }
     
     
@@ -260,44 +260,4 @@ extension NodeCanvas{
         }
         
     }
-}
-
-//MARK: Test functions
-extension NodeCanvas{
-    
-    func addTestGesture(){
-        /**TESTING ONLY*/
-        let gestureRecognizer = UITapGestureRecognizer()
-        gestureRecognizer.numberOfTapsRequired = 2
-        gestureRecognizer.addTarget(self, action: #selector(addNode))
-        self.addGestureRecognizer(gestureRecognizer)
-    }
-    
-    @objc
-    func addNode(){
-        
-//        do {
-//            let newNode = NodeView(nodeOperation: Constant.self)
-//            self.addSubview(newNode)
-//
-//            newNode.frame =
-//                CGRect(
-//                    x: self.bounds.midX,
-//                    y: self.bounds.midY,
-//                    width: 100,
-//                    height: 80)
-//
-//            subs.append(newNode.$desiredCoordinates
-//                .sink { (newPoint) in
-//                    let converted = self.convert(newPoint, from: newNode)
-//                    newNode.center = converted
-//                    self.updateConnections(for: newNode)
-//            })
-//
-//            nodes.append(newNode)
-//            layoutSubviews()
-//        }
-
-    }
-
 }

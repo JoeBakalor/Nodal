@@ -36,7 +36,7 @@ open class NodeView: UIView {
     var subs: [AnyCancellable]                                          = []
     
     // Model
-    private var nodeModel: NodeModel!
+    var nodeModel: NodeModel!
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)

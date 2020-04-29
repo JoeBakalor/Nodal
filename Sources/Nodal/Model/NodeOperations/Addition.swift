@@ -39,7 +39,17 @@ class Addition: NodeOperation {
         }
     }
     
-    
+    func compile(state: NodeState) -> String {
+        return
+            """
+            
+                \(OutputType().cType()) add(\(InputType().cType()) arg1, \(InputType().cType()) arg2)
+                {
+                    return (arg1 + arg2);
+                }
+            
+            """
+    }
     
     required init(){
         

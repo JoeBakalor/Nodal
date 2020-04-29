@@ -27,6 +27,14 @@ class Constant: NodeOperation{
         //state.outputs[0].value = Double(10)
     }
     
+    func compile(state: NodeState) -> String {
+            """
+            
+            #define arg1 \(state.outputs[0].value ?? 0)
+            
+            """
+    }
+    
     required init(){
         
     }
