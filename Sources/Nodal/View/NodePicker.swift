@@ -98,7 +98,7 @@ extension NodePicker: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
-        cell.backgroundColor = UIColor.yellow
+        cell.backgroundColor = UIColor.systemBlue
         cell.textLabel?.text = "\(Operation.allCases[indexPath.row].rawValue)"
         return cell
     }

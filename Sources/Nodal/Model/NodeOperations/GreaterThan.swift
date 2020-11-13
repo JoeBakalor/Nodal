@@ -2,14 +2,15 @@
 //  File.swift
 //  
 //
-//  Created by Joe Bakalor on 3/6/20.
+//  Created by Joe Bakalor on 11/4/20.
 //
 
 import Foundation
 
-class Division: NodeOperation{
 
-    static var operation: Operation     = .division
+class GreaterThan: NodeOperation{
+
+    static var operation: Operation     = .greaterThan
     typealias InputType                 = Double
     typealias OutputType                = Double
     static var numberInputs: Int        = 2
@@ -23,7 +24,7 @@ class Division: NodeOperation{
             else { return }
         print(inputOne)
         print(inputTwo)
-        state.outputs[0].value = inputOne/inputTwo
+        state.outputs[0].value = inputOne > inputTwo
     }
     
     //If no connection, set default value
@@ -40,9 +41,9 @@ class Division: NodeOperation{
     
     func compile(state: NodeState) -> String {
             """
-                \(OutputType().cType()) divide(\(InputType().cType()) arg1, \(InputType().cType()) arg2)
+                \(OutputType().cType()) greaterThan(\(InputType().cType()) arg1, \(InputType().cType()) arg2)
                 {
-                    return (arg1 / arg2);
+                    return (arg1 > arg2);
                 }
             
             """

@@ -83,8 +83,8 @@ extension NodeCanvas: NodePickerDelegate{
                 CGRect(
                 x: self.bounds.midX,
                 y: self.bounds.midY,
-                width: 100,
-                height: 80)
+                width: NodalConfiguration.nodeSize.width,
+                height: NodalConfiguration.nodeSize.height)
              
         subs.append(newNode.$desiredCoordinates
             .sink { (newPoint) in

@@ -21,7 +21,7 @@ open class NodeView: UIView {
     }
     
     // Shape layers
-    private let backgroundShape                 = CAShapeLayer()
+    private let backgroundShape                                         = CAShapeLayer()
     
     private var panModeRect: CGRect                                     = .zero
     private var normalModeRect: CGRect                                  = .zero

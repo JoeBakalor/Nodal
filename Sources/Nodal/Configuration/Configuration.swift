@@ -16,7 +16,7 @@ struct NodalConfiguration{
     static let connectionThickness: CGFloat = 3
     static let canvasColor                  = UIColor.systemGray
     //Sizes
-    static let nodeSize                     = CGSize(width: 100, height: 80)
+    static let nodeSize                     = CGSize(width: 200, height: 80)
     static let connectorSize                = CGSize(width: 20, height: 20)
     
 }

@@ -2,18 +2,18 @@
 //  File.swift
 //  
 //
-//  Created by Joe Bakalor on 3/6/20.
+//  Created by Joe Bakalor on 5/1/20.
 //
 
 import Foundation
 
-class Division: NodeOperation{
+class Multiplication: NodeOperation {
 
-    static var operation: Operation     = .division
-    typealias InputType                 = Double
-    typealias OutputType                = Double
-    static var numberInputs: Int        = 2
-    static var numberOutputs: Int       = 1
+    static var operation: Operation = .multiplication
+    typealias InputType             = Double
+    typealias OutputType            = Double
+    static var numberInputs: Int    = 2
+    static var numberOutputs: Int   = 1
     
     func process(state: NodeState) {
         setDefaults(state: state)
@@ -21,9 +21,9 @@ class Division: NodeOperation{
             let inputOne = state.inputs[0].value as? InputType,
             let inputTwo =  state.inputs[1].value as? InputType
             else { return }
-        print(inputOne)
-        print(inputTwo)
-        state.outputs[0].value = inputOne/inputTwo
+        
+        state.outputs[0].value = (inputOne * inputTwo)
+        print("Output updated: \(String(describing: state.outputs[0].value))")
     }
     
     //If no connection, set default value
@@ -39,17 +39,19 @@ class Division: NodeOperation{
     }
     
     func compile(state: NodeState) -> String {
+        return
             """
-                \(OutputType().cType()) divide(\(InputType().cType()) arg1, \(InputType().cType()) arg2)
+            
+                \(OutputType().cType()) add(\(InputType().cType()) arg1, \(InputType().cType()) arg2)
                 {
-                    return (arg1 / arg2);
+                    return (arg1 + arg2);
                 }
             
             """
     }
     
-    
     required init(){
         
     }
 }
+
